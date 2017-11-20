@@ -16,9 +16,11 @@ node('python') {
 			returnStdout: true
 			).trim()
 		println(git_test)
-		//git_clone = sh (
-        //script: 'git clone https://gerrit.mcp.mirantis.net/salt-models/mcp-virtual-lab',
-        //returnStdout: true
-        //).trim()
+		git_clone = sh (
+        script: 'git clone https://gerrit.mcp.mirantis.net/salt-models/mcp-virtual-lab',
+        returnStdout: true
+        ).trim()
+        println(git_clone)
+        
 	}
 }
