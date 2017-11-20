@@ -35,7 +35,7 @@ node('python') {
 		        sh "git remote add temp_repo ${temp_repo}"
 		        sh "git remote -v"
 		        sh "git status"
-		        git.ushGitChanges(work_dir, merge_branch, 'temp_repo', credentialsId)
+		        git.pushGitChanges(work_dir, merge_branch, 'temp_repo', credentialsId)
             }
             sh "rm -rf ${work_dir}"       
 	}
