@@ -18,8 +18,13 @@ def temp_repo = 'https://github.com/realjktu/stuff'
 
 node('python') {
 	stage ('Checkout') {
+		git_test = sh (
+			script: 'pwd; ls -la',
+			returnStdout: true
+			).trim()
+		println(git_test)
+
         dir (tmp_dir){		
-	        sh "rm -rf ${work_dir}"
 			git_test = sh (
 				script: 'pwd; ls -la',
 				returnStdout: true
