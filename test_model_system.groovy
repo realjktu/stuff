@@ -12,7 +12,7 @@
 node('python') {
 	stage ('Checkout') {
 		git_test = sh (
-			script: 'pwd; ls -la'
+			script: 'pwd; ls -la',
 			returnStdout: true
 			).trim()
 		println(git_test)
