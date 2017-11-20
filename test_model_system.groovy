@@ -36,7 +36,6 @@ node('python') {
 		        sh "git remote add origin ${temp_repo}"
 		        sh "git remote -v"
             }
-            sh "rm -rf ${work_dir}"
-       }
+            sh "rm -rf ${work_dir}"       
 	}
 }
