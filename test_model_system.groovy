@@ -17,10 +17,7 @@ def temp_repo = 'https://github.com/realjktu/stuff'
 
 node('python') {
 	stage ('Checkout') {
-		def work_dir_file = new File(work_dir)
-		def result = work_dir_file.deleteDir()
-        assert result
-        
+        sh "rm -rf ${work_dir}"
 		git_test = sh (
 			script: 'pwd; ls -la',
 			returnStdout: true
