@@ -27,7 +27,7 @@ node('python') {
             returnStdout: true
         ).trim()        
 */        
-        dir (${work_dir}){
+        dir (work_dir){
 		    git_test = sh (
 			   script: 'pwd; ls -la',
 			   returnStdout: true
