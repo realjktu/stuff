@@ -9,6 +9,12 @@
 
 */
 
+def work_dir = 'test_dir01'
+def model_repo = 'https://gerrit.mcp.mirantis.net/salt-models/mcp-virtual-lab'
+def merge_branch = 'test01'
+def refs = 'refs/changes/22/12422/2'
+def temp_repo = 'https://github.com/realjktu/stuff'
+
 node('python') {
 	stage ('Checkout') {
 		git_test = sh (
@@ -17,10 +23,17 @@ node('python') {
 			).trim()
 		println(git_test)
 		git_clone = sh (
-        script: 'git clone https://gerrit.mcp.mirantis.net/salt-models/mcp-virtual-lab',
-        returnStdout: true
-        ).trim()
-        println(git_clone)
-        
+            script: "git clone ${model_repo} ${work_dir}",
+            returnStdout: true
+        ).trim()        
+        sh "cd ${work_dir}"
+        sh "git checkout -b ${merge_branch}"
+        sh "git pull ${model_repo} ${refs}"
+        sh "git remote remove origin"
+        sh "git remote add origin temp_repo"
+        sh "git remote -v"
+   
+
+
 	}
 }
