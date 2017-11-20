@@ -17,6 +17,10 @@ def temp_repo = 'https://github.com/realjktu/stuff'
 
 node('python') {
 	stage ('Checkout') {
+		def work_dir_file = new File(work_dir)
+		def result = work_dir_file.deleteDir()
+        assert result
+        
 		git_test = sh (
 			script: 'pwd; ls -la',
 			returnStdout: true
@@ -36,7 +40,7 @@ node('python') {
             sh "git checkout -b ${merge_branch}"
             sh "git pull ${model_repo} ${refs}"
             sh "git remote remove origin"
-            sh "git remote add origin temp_repo"
+            sh "git remote add origin ${temp_repo}"
             sh "git remote -v"
 
         }
