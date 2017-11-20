@@ -22,11 +22,17 @@ node('python') {
 			returnStdout: true
 			).trim()
 		println(git_test)
-		git_clone = sh (
+/*		git_clone = sh (
             script: "git clone ${model_repo} ${work_dir}",
             returnStdout: true
         ).trim()        
+*/        
         sh "cd ${work_dir}"
+		git_test = sh (
+			script: 'pwd; ls -la',
+			returnStdout: true
+			).trim()
+		println(git_test)
         sh "git checkout -b ${merge_branch}"
         sh "git pull ${model_repo} ${refs}"
         sh "git remote remove origin"
