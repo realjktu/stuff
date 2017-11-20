@@ -27,17 +27,19 @@ node('python') {
             returnStdout: true
         ).trim()        
 */        
-        sh "cd ${work_dir}"
-		git_test = sh (
-			script: 'pwd; ls -la',
-			returnStdout: true
-			).trim()
-		println(git_test)
-        sh "git checkout -b ${merge_branch}"
-        sh "git pull ${model_repo} ${refs}"
-        sh "git remote remove origin"
-        sh "git remote add origin temp_repo"
-        sh "git remote -v"
+        dir (${work_dir}){
+		    git_test = sh (
+			   script: 'pwd; ls -la',
+			   returnStdout: true
+			   ).trim()
+		    println(git_test)
+            sh "git checkout -b ${merge_branch}"
+            sh "git pull ${model_repo} ${refs}"
+            sh "git remote remove origin"
+            sh "git remote add origin temp_repo"
+            sh "git remote -v"
+
+        }
    
 
 
