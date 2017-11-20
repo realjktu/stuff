@@ -9,6 +9,7 @@
 
 */
 
+def tmp_dir = "tmp01"
 def work_dir = 'test_dir01'
 def model_repo = 'https://gerrit.mcp.mirantis.net/salt-models/mcp-virtual-lab'
 def merge_branch = 'test01'
@@ -17,32 +18,29 @@ def temp_repo = 'https://github.com/realjktu/stuff'
 
 node('python') {
 	stage ('Checkout') {
-        sh "rm -rf ${work_dir}"
-		git_test = sh (
-			script: 'pwd; ls -la',
-			returnStdout: true
-			).trim()
-		println(git_test)
-/*		git_clone = sh (
-            script: "git clone ${model_repo} ${work_dir}",
-            returnStdout: true
-        ).trim()        
-*/        
-        dir (work_dir){
-		    git_test = sh (
-			   script: 'pwd; ls -la',
-			   returnStdout: true
-			   ).trim()
-		    println(git_test)
-            sh "git checkout -b ${merge_branch}"
-            sh "git pull ${model_repo} ${refs}"
-            sh "git remote remove origin"
-            sh "git remote add origin ${temp_repo}"
-            sh "git remote -v"
-
-        }
-   
-
-
+        dir (tmp_dir){		
+	        sh "rm -rf ${work_dir}"
+			git_test = sh (
+				script: 'pwd; ls -la',
+				returnStdout: true
+				).trim()
+			println(git_test)
+			git_clone = sh (
+	            script: "git clone ${model_repo} ${work_dir}",
+	            returnStdout: true
+	        ).trim()        	        
+            dir (work_dir){		
+				git_test = sh (
+				    script: 'pwd; ls -la',
+				   returnStdout: true
+				   ).trim()
+				println(git_test)
+		        sh "git checkout -b ${merge_branch}"
+		        sh "git pull ${model_repo} ${refs}"
+		        sh "git remote remove origin"
+		        sh "git remote add origin ${temp_repo}"
+		        sh "git remote -v"
+            }
+       }
 	}
 }
