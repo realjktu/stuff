@@ -49,9 +49,9 @@ node("docker") {
       sh("rm -rf src || true")
       dir("src") {
         def pollBranches = [[name:SOURCE_BRANCH]]
-        if (debian_branch) {
-          pollBranches.add([name:DEBIAN_BRANCH])
-        }
+//        if (debian_branch) {
+//          pollBranches.add([name:DEBIAN_BRANCH])
+//        }
 /*        
         checkout changelog: true, poll: false,
           scm: [$class: 'GitSCM', branches: pollBranches, doGenerateSubmoduleConfigurations: false,
