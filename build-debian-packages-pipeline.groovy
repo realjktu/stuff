@@ -60,7 +60,11 @@ node("docker") {
 */          
         checkout changelog: true, poll: false,
           scm: [$class: 'GitSCM', branches: pollBranches, doGenerateSubmoduleConfigurations: false,
-          extensions: [[$class: 'CleanCheckout']],  submoduleCfg: [], userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL]]]
+          extensions: [[$class: 'CleanCheckout']],  submoduleCfg: [], 
+          userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: 'refs/changes/90/11490/9']]]
+        //checkout([$class: 'GitSCM', branches: [[name: "$GERRIT_PATCHSET_REVISION"]], 
+        //  doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], 
+        // userRemoteConfigs: [[credentialsId: 'planets_gerrit_id_rsa', name: "", refspec: "$GERRIT_REFSPEC", url: 'ssh://gerrit@gerrit.datenkollektiv.de:12345/planets-simulation']]])
 
         if (debian_branch){
           sh("git checkout "+DEBIAN_BRANCH)
