@@ -49,9 +49,9 @@ node("docker") {
       sh("rm -rf src || true")
       dir("src") {
         def pollBranches = [[name:SOURCE_BRANCH]]
-//        if (debian_branch) {
-//          pollBranches.add([name:DEBIAN_BRANCH])
-//        }
+        if (debian_branch) {
+          pollBranches.add([name:DEBIAN_BRANCH])
+        }
 /*        
         checkout changelog: true, poll: false,
           scm: [$class: 'GitSCM', branches: pollBranches, doGenerateSubmoduleConfigurations: false,
@@ -105,7 +105,7 @@ node("docker") {
     }
 
     if (uploadAptly) {
-      lock("aptly-api") {
+//      lock("aptly-api") {
         stage("upload") {
           buildSteps = [:]
           debFiles = sh script: "ls build-area/*.deb", returnStdout: true
@@ -126,7 +126,7 @@ node("docker") {
           aptly.snapshotRepo(APTLY_URL, APTLY_REPO, timestamp)
           aptly.publish(APTLY_URL)
         }
-      }
+//      }
     }
     if (uploadPpa) {
       stage("upload launchpad") {
