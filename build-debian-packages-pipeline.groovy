@@ -52,12 +52,12 @@ node("docker") {
         if (debian_branch) {
           pollBranches.add([name:DEBIAN_BRANCH])
         }
-/*        
+        
         checkout changelog: true, poll: false,
           scm: [$class: 'GitSCM', branches: pollBranches, doGenerateSubmoduleConfigurations: false,
           extensions: [[$class: 'CleanCheckout']],  submoduleCfg: [], userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL]],
           refspec: 'refs/changes/90/11490/9']
-*/          
+          
         if (debian_branch){
           sh("git checkout "+DEBIAN_BRANCH)
         }
