@@ -106,9 +106,21 @@ node("docker") {
 
     if (uploadAptly) {
 //      lock("aptly-api") {
+        /*
+        Create repo:
+        curl -X POST -H 'Content-Type: application/json' --data '{"Name": "test-api-01"}' http://localhost:8084/api/repos
+        Upload package:
+        curl -X POST -F file=@/root/salt-formula-dogtag_0.1+201711150842.167219c~xenial1_all.deb http://localhost:8084/api/files/salt-formula-dogtag
+        Add to repo:
+        curl -X POST http://localhost:8084/api/repos/test-api-01/file/salt-formula-dogtag
+        Publish:
+        curl -X POST -H 'Content-Type: application/json' --data '{"SourceKind": "local", "Sources": [{"Name": "test-api-01"}], "Architectures": ["amd64"], "Distribution": "test-api-01"}' http://localhost:8084/api/publish/:.
+
+        */
         stage("upload") {
           buildSteps = [:]
-          debFiles = sh script: "ls build-area/*.deb", returnStdout: true
+          sh("curl -X POST -H 'Content-Type: application/json' --data '{\"Name\": \"${APTLY_REPO}\"}' ${APTLY_URL}/api/repos")
+          debFiles = sh script: "ls build-area/*.deb", returnStdout: true          
           for (file in debFiles.tokenize()) {
             workspace = common.getWorkspace()
             def fh = new File((workspace+"/"+file).trim())
@@ -123,8 +135,9 @@ node("docker") {
         }
 
         stage("publish") {
-          aptly.snapshotRepo(APTLY_URL, APTLY_REPO, timestamp)
-          aptly.publish(APTLY_URL)
+          sh("curl -X POST -H 'Content-Type: application/json' --data '{\"SourceKind\": \"local\", \"Sources\": [{\"Name\": \"${APTLY_REPO}\"}], \"Architectures\": [\"amd64\"], \"Distribution\": \"${APTLY_REPO}\"}' ${APTLY_URL}/api/publish/:.")
+          //aptly.snapshotRepo(APTLY_URL, APTLY_REPO, timestamp)
+          //aptly.publish(APTLY_URL)
         }
 //      }
     }
