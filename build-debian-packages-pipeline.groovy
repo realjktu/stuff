@@ -42,6 +42,13 @@ try {
   uploadAptly = true
 }
 
+def deployOS
+try {
+  deployOS = DEPLOY_OS.toBoolean()
+} catch (MissingPropertyException e) {
+  deployOS = false
+}
+
 
 def timestamp = common.getDatetime()
 
