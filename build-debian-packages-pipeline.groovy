@@ -82,7 +82,7 @@ node("docker") {
         aptlyRepo = buidDescr
       sh("rm -rf src || true")
       dir("src") {
-        def pollBranches = [[name:FETCH_HEAD]]
+        def pollBranches = [[name:'FETCH_HEAD']]
         if (debian_branch) {
           pollBranches.add([name:DEBIAN_BRANCH])
       }
