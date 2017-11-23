@@ -74,7 +74,8 @@ node("docker") {
       debian.cleanup(OS+":"+DIST)
     }
     stage("build-source") {
-      debian.buildSource("src", OS+":"+DIST, snapshot, 'Jenkins', 'autobuild@mirantis.com', revisionPostfix)
+      //debian.buildSource("src", OS+":"+DIST, snapshot, 'Jenkins', 'autobuild@mirantis.com', revisionPostfix)
+      buildSourceGbp("src", OS+":"+DIST, snapshot, 'Jenkins', 'autobuild@mirantis.com', revisionPostfix)
       archiveArtifacts artifacts: "build-area/*.dsc"
       archiveArtifacts artifacts: "build-area/*_source.changes"
       archiveArtifacts artifacts: "build-area/*.tar.*"
@@ -156,4 +157,65 @@ node("docker") {
 //  } /* finally {
 //     common.sendNotification(currentBuild.result,"",["slack"])
 //  } */
+}
+
+/*
+ * Build source package using git-buildpackage
+ *
+ * @param dir   Tree to build
+ * @param image Image name to use for build (default debian:sid)
+ * @param snapshot Generate snapshot version (default false)
+ */
+def buildSourceGbp(dir, image="debian:sid", snapshot=false, gitName='Jenkins', gitEmail='jenkins@dummy.org', revisionPostfix="") {
+    def common = new com.mirantis.mk.Common()
+    def jenkinsUID = common.getJenkinsUid()
+    def jenkinsGID = common.getJenkinsGid()
+
+    if (! revisionPostfix) {
+        revisionPostfix = ""
+    }
+
+    def workspace = common.getWorkspace()
+    def dockerLib = new com.mirantis.mk.Docker()
+    def imageArray = image.split(":")
+    def os = imageArray[0]
+    def dist = imageArray[1]
+    def img = dockerLib.getImage("tcpcloud/debian-build-${os}-${dist}", image)
+
+    img.inside("-u root:root") {
+
+        withEnv(["DEBIAN_FRONTEND=noninteractive", "DEBFULLNAME='${gitName}'", "DEBEMAIL='${gitEmail}'"]) {
+            sh("""bash -c 'cd ${workspace} && (which eatmydata || (apt-get update && apt-get install -y eatmydata)) &&
+            export LD_LIBRARY_PATH=\${LD_LIBRARY_PATH:+"\$LD_LIBRARY_PATH:"}/usr/lib/libeatmydata &&
+            export LD_PRELOAD=\${LD_PRELOAD:+"\$LD_PRELOAD "}libeatmydata.so &&
+            apt-get update && apt-get install -y build-essential git-buildpackage dpkg-dev sudo &&
+            groupadd -g ${jenkinsGID} jenkins &&
+            useradd -s /bin/bash --uid ${jenkinsUID} --gid ${jenkinsGID} -m jenkins &&
+            chown -R ${jenkinsUID}:${jenkinsGID} /home/jenkins &&
+            cd ${dir} &&
+            sudo -H -E -u jenkins git config --global user.name "${gitName}" &&
+            sudo -H -E -u jenkins git config --global user.email "${gitEmail}" &&
+            [[ "${snapshot}" == "false" ]] || (
+                VERSION=`dpkg-parsechangelog --count 1 --show-field Version` &&
+                UPSTREAM_VERSION=`echo \$VERSION | cut -d "-" -f 1` &&
+                REVISION=`echo \$VERSION | cut -d "-" -f 2` &&
+                TIMESTAMP=`date +%Y%m%d%H%M` &&
+                if [[ "`cat debian/source/format`" = *quilt* ]]; then
+                    UPSTREAM_BRANCH=`(grep upstream-branch debian/gbp.conf || echo master) | cut -d = -f 2 | tr -d " "` &&
+                    UPSTREAM_REV=`git rev-parse --short HEAD` &&
+                    NEW_UPSTREAM_VERSION="\$UPSTREAM_VERSION+\$TIMESTAMP.\$UPSTREAM_REV" &&
+                    NEW_UPSTREAM_VERSION_TAG=`echo \$NEW_UPSTREAM_VERSION | sed 's/.*://'` &&
+                    NEW_VERSION=\$NEW_UPSTREAM_VERSION-\$REVISION$revisionPostfix &&
+                    echo "Generating new upstream version \$NEW_UPSTREAM_VERSION_TAG" &&
+                    sudo -H -E -u jenkins git tag \$NEW_UPSTREAM_VERSION_TAG HEAD 
+                else
+                    NEW_VERSION=\$VERSION+\$TIMESTAMP.`git rev-parse --short HEAD`$revisionPostfix
+                fi &&
+                sudo -H -E -u jenkins gbp dch --auto --multimaint-merge --ignore-branch --new-version=\$NEW_VERSION --distribution `lsb_release -c -s` --force-distribution &&
+                sudo -H -E -u jenkins git add -u debian/changelog &&
+                sudo -H -E -u jenkins git commit -m "New snapshot version \$NEW_VERSION"
+            ) &&
+            sudo -H -E -u jenkins gbp buildpackage -nc --git-force-create --git-notify=false --git-ignore-branch --git-ignore-new --git-verbose --git-export-dir=../build-area -sa -S -uc -us '""")
+        }
+    }
 }
