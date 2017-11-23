@@ -198,7 +198,7 @@ node("docker") {
             [$class: 'StringParameterValue', name: 'OPENSTACK_API_PROJECT_ID', value: ''],
             [$class: 'StringParameterValue', name: 'OPENSTACK_API_URL', value: 'https://cloud-cz.bud.mirantis.net:5000'],
             [$class: 'StringParameterValue', name: 'OPENSTACK_API_USER_DOMAIN', value: 'default'],
-            [$class: 'StringParameterValue', name: 'OPENSTACK_API_VERSION', value: 3],
+            [$class: 'StringParameterValue', name: 'OPENSTACK_API_VERSION', value: '3'],
             [$class: 'StringParameterValue', name: 'OPENSTACK_USER_DOMAIN', value: 'default'],
             [$class: 'StringParameterValue', name: 'SALT_MASTER_CREDENTIALS', value: 'salt-qa-credentials'],
             [$class: 'StringParameterValue', name: 'SALT_MASTER_URL', value: ''],
