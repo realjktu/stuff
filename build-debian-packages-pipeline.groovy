@@ -21,6 +21,13 @@ try {
   revisionPostfix = null
 }
 
+def aptlyRepo
+try {
+  aptlyRepo = APTLY_REPO
+} catch (MissingPropertyException e) {
+  aptlyRepo = null
+}
+
 def uploadPpa
 try {
   uploadPpa = UPLOAD_PPA.toBoolean()
@@ -65,12 +72,14 @@ node("docker") {
     stage("checkout") {
       wrap([$class: 'BuildUser']) {
         if (env.BUILD_USER_ID) {
-          APTLY_REPO = "${env.BUILD_USER_ID}-${JOB_NAME}-${BUILD_NUMBER}"
+          buidDescr = "${env.BUILD_USER_ID}-${JOB_NAME}-${BUILD_NUMBER}"
         } else {
-          APTLY_REPO = "jenkins-${JOB_NAME}-${BUILD_NUMBER}"
+          buidDescr = "jenkins-${JOB_NAME}-${BUILD_NUMBER}"
         }
       }
-      currentBuild.description = APTLY_REPO      
+      currentBuild.description = buidDescr
+      if (aptlyRepo == '')
+        aptlyRepo = buidDescr
       sh("rm -rf src || true")
       dir("src") {
         def pollBranches = [[name:SOURCE_BRANCH]]
