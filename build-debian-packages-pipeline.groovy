@@ -82,27 +82,17 @@ node("docker") {
         aptlyRepo = buidDescr
       sh("rm -rf src || true")
       dir("src") {
-        def pollBranches = [[name:SOURCE_BRANCH]]
+        def pollBranches = [[name:FETCH_HEAD]]
         if (debian_branch) {
           pollBranches.add([name:DEBIAN_BRANCH])
       }
-/*        
-        checkout changelog: true, poll: false,
-          scm: [$class: 'GitSCM', branches: pollBranches, doGenerateSubmoduleConfigurations: false,
-          extensions: [[$class: 'CleanCheckout']],  submoduleCfg: [], userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL]],
-          refspec: '+refs/changes/90/11490/9']
-*/          
         checkout changelog: true, poll: false,
           scm: [$class: 'GitSCM', branches: pollBranches, doGenerateSubmoduleConfigurations: false,
           extensions: [[$class: 'CleanCheckout']],  submoduleCfg: [], 
-          userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: 'refs/changes/90/11490/9']]]
-        //checkout([$class: 'GitSCM', branches: [[name: "$GERRIT_PATCHSET_REVISION"]], 
-        //  doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], 
-        // userRemoteConfigs: [[credentialsId: 'planets_gerrit_id_rsa', name: "", refspec: "$GERRIT_REFSPEC", url: 'ssh://gerrit@gerrit.datenkollektiv.de:12345/planets-simulation']]])
+          userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: SOURCE_REFSPEC]]]
 
         if (debian_branch){
-          //sh("git checkout "+DEBIAN_BRANCH)
-          sh("git merge remotes/origin/debian/xenial -m 'Merge with debian/xenial'")
+          sh("git merge remotes/origin/${DEBIAN_BRANCH} -m 'Merge with ${DEBIAN_BRANCH}'")
         }
       }
       debian.cleanup(OS+":"+DIST)
@@ -142,17 +132,6 @@ node("docker") {
 
     if (uploadAptly && buildPackage) {
 //      lock("aptly-api") {
-        /*
-        Create repo:
-        curl -X POST -H 'Content-Type: application/json' --data '{"Name": "test-api-01"}' http://localhost:8084/api/repos
-        Upload package:
-        curl -X POST -F file=@/root/salt-formula-dogtag_0.1+201711150842.167219c~xenial1_all.deb http://localhost:8084/api/files/salt-formula-dogtag
-        Add to repo:
-        curl -X POST http://localhost:8084/api/repos/test-api-01/file/salt-formula-dogtag
-        Publish:
-        curl -X POST -H 'Content-Type: application/json' --data '{"SourceKind": "local", "Sources": [{"Name": "test-api-01"}], "Architectures": ["amd64"], "Distribution": "test-api-01"}' http://localhost:8084/api/publish/:.
-
-        */
         stage("upload") {
           buildSteps = [:]
           sh("curl -X POST -H 'Content-Type: application/json' --data '{\"Name\": \"${APTLY_REPO}\"}' ${APTLY_URL}/api/repos")
@@ -172,8 +151,6 @@ node("docker") {
 
         stage("publish") {
           sh("curl -X POST -H 'Content-Type: application/json' --data '{\"SourceKind\": \"local\", \"Sources\": [{\"Name\": \"${APTLY_REPO}\"}], \"Architectures\": [\"amd64\"], \"Distribution\": \"${APTLY_REPO}\"}' ${APTLY_URL}/api/publish/:.")
-          //aptly.snapshotRepo(APTLY_URL, APTLY_REPO, timestamp)
-          //aptly.publish(APTLY_URL)
         }
 //      }
     }
