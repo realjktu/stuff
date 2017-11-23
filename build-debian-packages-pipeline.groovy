@@ -49,11 +49,19 @@ try {
   deployOS = false
 }
 
+def buildPackage
+try {
+  buildPackage = BUILD_PACKAGE.toBoolean()
+} catch (MissingPropertyException e) {
+  buildPackage = true
+}
+
 
 def timestamp = common.getDatetime()
 
 node("docker") {
 //  try{
+  if (buildPackage) {
     stage("checkout") {
       wrap([$class: 'BuildUser']) {
         if (env.BUILD_USER_ID) {
@@ -68,7 +76,7 @@ node("docker") {
         def pollBranches = [[name:SOURCE_BRANCH]]
         if (debian_branch) {
           pollBranches.add([name:DEBIAN_BRANCH])
-        }
+      }
 /*        
         checkout changelog: true, poll: false,
           scm: [$class: 'GitSCM', branches: pollBranches, doGenerateSubmoduleConfigurations: false,
@@ -110,8 +118,8 @@ node("docker") {
       )
       archiveArtifacts artifacts: "build-area/*.deb"
     }
-
-    if (lintianCheck) {
+  }
+    if (lintianCheck && buildPackage) {
       stage("lintian") {
         changes = sh script: "ls build-area/*_"+ARCH+".changes", returnStdout: true
         try {
@@ -123,7 +131,7 @@ node("docker") {
       }
     }
 
-    if (uploadAptly) {
+    if (uploadAptly && buildPackage) {
 //      lock("aptly-api") {
         /*
         Create repo:
@@ -160,7 +168,7 @@ node("docker") {
         }
 //      }
     }
-    if (uploadPpa) {
+    if (uploadPpa && buildPackage) {
       stage("upload launchpad") {
         debian.importGpgKey("launchpad-private")
         debian.uploadPpa(PPA, "build-area", "launchpad-private")
