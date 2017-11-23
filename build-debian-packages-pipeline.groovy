@@ -168,7 +168,7 @@ node("docker") {
     }
     if (deployOS) {
       stage("Deploy OpenStack with changed package") {
-        build job: 'oiurchenko_aio_test',
+        deployBuild = build (job: oiurchenko_aio_test, propagate: false,
           parameters: [
             [$class: 'StringParameterValue', name: 'FORMULA_PKG_REVISION', value: 'stable'],
             [$class: 'StringParameterValue', name: 'HEAT_STACK_ENVIRONMENT', value: 'devcloud'],
@@ -205,8 +205,8 @@ node("docker") {
             [$class: 'BooleanParameterValue', name: 'STACK_DELETE', value: False],
             [$class: 'BooleanParameterValue', name: 'STACK_REUSE', value: False],
             [$class: 'BooleanParameterValue', name: 'TEST_DOCKER_INSTALL', value: False],
-            [$class: 'StringParameterValue', name: 'SALT_OVERRIDES', value: 'linux_system_repo: deb [ arch=amd64 trusted=yes ] ${APTLY_URL} ${APTLY_REPO} main\nlinux_system_repo_priority: 1200\nlinux_system_repo_pin: origin 172.17.49.50']
-            ]
+            [$class: 'TextParameterValue', name: 'SALT_OVERRIDES', value: 'linux_system_repo: deb [ arch=amd64 trusted=yes ] ${APTLY_URL} ${APTLY_REPO} main\nlinux_system_repo_priority: 1200\nlinux_system_repo_pin: origin 172.17.49.50']
+            ])
 
       }
     }
