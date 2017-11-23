@@ -67,7 +67,8 @@ node("docker") {
         // userRemoteConfigs: [[credentialsId: 'planets_gerrit_id_rsa', name: "", refspec: "$GERRIT_REFSPEC", url: 'ssh://gerrit@gerrit.datenkollektiv.de:12345/planets-simulation']]])
 
         if (debian_branch){
-          sh("git checkout "+DEBIAN_BRANCH)
+          //sh("git checkout "+DEBIAN_BRANCH)
+          sh("git merge remotes/origin/debian/xenial -m 'Merge with debian/xenial'")
         }
       }
       debian.cleanup(OS+":"+DIST)
