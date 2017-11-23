@@ -172,7 +172,7 @@ node("docker") {
           parameters: [
             [$class: 'StringParameterValue', name: 'FORMULA_PKG_REVISION', value: 'stable'],
             [$class: 'StringParameterValue', name: 'HEAT_STACK_ENVIRONMENT', value: 'devcloud'],
-            [$class: 'StringParameterValue', name: 'HEAT_STACK_PUBLIC_NET', value: 'public'],
+            [$class: 'StringParameterValue', name: 'HEAT_STACK_PUBLIC_NET', value: 'public']/*,
             [$class: 'StringParameterValue', name: 'HEAT_STACK_ZONE', value: 'mcp-oscore'],
             [$class: 'StringParameterValue', name: 'OPENSTACK_API_CLIENT', value: ''],
             [$class: 'StringParameterValue', name: 'OPENSTACK_API_CREDENTIALS', value: 'openstack-devcloud-credentials'],
@@ -206,6 +206,7 @@ node("docker") {
             [$class: 'BooleanParameterValue', name: 'STACK_REUSE', value: False],
             [$class: 'BooleanParameterValue', name: 'TEST_DOCKER_INSTALL', value: False],
             [$class: 'TextParameterValue', name: 'SALT_OVERRIDES', value: 'linux_system_repo: deb [ arch=amd64 trusted=yes ] ${APTLY_URL} ${APTLY_REPO} main\nlinux_system_repo_priority: 1200\nlinux_system_repo_pin: origin 172.17.49.50']
+            */
             ])
 
       }
