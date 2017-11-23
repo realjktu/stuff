@@ -218,10 +218,10 @@ node("docker") {
             [$class: 'StringParameterValue', name: 'TEST_TEMPEST_TARGET', value: ''],
             [$class: 'StringParameterValue', name: 'STACK_RECLASS_ADDRESS', value: 'https://gerrit.mcp.mirantis.net/salt-models/mcp-virtual-aio'],
             [$class: 'StringParameterValue', name: 'STACK_RECLASS_BRANCH', value: 'stable/ocata'],
-            [$class: 'BooleanParameterValue', name: 'ASK_ON_ERROR', value: 'False'],
-            [$class: 'BooleanParameterValue', name: 'STACK_DELETE', value: 'False'],
-            [$class: 'BooleanParameterValue', name: 'STACK_REUSE', value: 'False'],
-            [$class: 'BooleanParameterValue', name: 'TEST_DOCKER_INSTALL', value: 'False'],
+            [$class: 'BooleanParameterValue', name: 'ASK_ON_ERROR', value: false],
+            [$class: 'BooleanParameterValue', name: 'STACK_DELETE', value: false],
+            [$class: 'BooleanParameterValue', name: 'STACK_REUSE', value: false],
+            [$class: 'BooleanParameterValue', name: 'TEST_DOCKER_INSTALL', value: false],
             [$class: 'TextParameterValue', name: 'SALT_OVERRIDES', value: "linux_system_repo: deb [ arch=amd64 trusted=yes ] ${APTLY_URL} ${APTLY_REPO} main\nlinux_system_repo_priority: 1200\nlinux_system_repo_pin: origin 172.17.49.50"]            
           ])
 
