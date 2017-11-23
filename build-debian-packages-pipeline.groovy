@@ -6,7 +6,7 @@ def snapshot
 try {
   snapshot = DEBIAN_SNAPSHOT
 } catch (MissingPropertyException e) {
-  snapshot = false
+  snapshot = true
 }
 def debian_branch
 try {
