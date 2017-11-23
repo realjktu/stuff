@@ -42,10 +42,20 @@ try {
   uploadAptly = true
 }
 
+
 def timestamp = common.getDatetime()
+
 node("docker") {
 //  try{
     stage("checkout") {
+      wrap([$class: 'BuildUser']) {
+        if (env.BUILD_USER_ID) {
+          APTLY_REPO = "${env.BUILD_USER_ID}-${JOB_NAME}-${BUILD_NUMBER}"
+        } else {
+          APTLY_REPO = "jenkins-${JOB_NAME}-${BUILD_NUMBER}"
+        }
+      }
+      currentBuild.description = APTLY_REPO      
       sh("rm -rf src || true")
       dir("src") {
         def pollBranches = [[name:SOURCE_BRANCH]]
