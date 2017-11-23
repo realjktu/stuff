@@ -199,7 +199,7 @@ node("docker") {
             [$class: 'BooleanParameterValue', name: 'STACK_DELETE', value: false],
             [$class: 'BooleanParameterValue', name: 'STACK_REUSE', value: false],
             [$class: 'BooleanParameterValue', name: 'TEST_DOCKER_INSTALL', value: false],
-            [$class: 'TextParameterValue', name: 'SALT_OVERRIDES', value: "linux_system_repo: deb [ arch=amd64 trusted=yes ] ${APTLY_URL} ${APTLY_REPO} main\nlinux_system_repo_priority: 1200\nlinux_system_repo_pin: origin 172.17.49.50"]            
+            [$class: 'TextParameterValue', name: 'SALT_OVERRIDES', value: "linux_system_repo: deb [ arch=amd64 trusted=yes ] ${APTLY_REPO_URL} ${APTLY_REPO} main\nlinux_system_repo_priority: 1200\nlinux_system_repo_pin: origin 172.17.49.50"]            
           ])
 
       }
