@@ -134,7 +134,7 @@ node("docker") {
 //      lock("aptly-api") {
         stage("upload") {
           buildSteps = [:]
-          sh("curl -X POST -H 'Content-Type: application/json' --data '{\"Name\": \"${APTLY_REPO}\"}' ${APTLY_URL}/api/repos")
+          sh("curl -X POST -H 'Content-Type: application/json' --data '{\"Name\": \"${aptlyRepo}\"}' ${APTLY_URL}/api/repos")
           debFiles = sh script: "ls build-area/*.deb", returnStdout: true          
           for (file in debFiles.tokenize()) {
             workspace = common.getWorkspace()
@@ -142,7 +142,7 @@ node("docker") {
             buildSteps[fh.name.split('_')[0]] = aptly.uploadPackageStep(
                   "build-area/"+fh.name,
                   APTLY_URL,
-                  APTLY_REPO,
+                  aptlyRepo,
                   true
               )
           }
@@ -150,7 +150,7 @@ node("docker") {
         }
 
         stage("publish") {
-          sh("curl -X POST -H 'Content-Type: application/json' --data '{\"SourceKind\": \"local\", \"Sources\": [{\"Name\": \"${APTLY_REPO}\"}], \"Architectures\": [\"amd64\"], \"Distribution\": \"${APTLY_REPO}\"}' ${APTLY_URL}/api/publish/:.")
+          sh("curl -X POST -H 'Content-Type: application/json' --data '{\"SourceKind\": \"local\", \"Sources\": [{\"Name\": \"${aptlyRepo}\"}], \"Architectures\": [\"amd64\"], \"Distribution\": \"${aptlyRepo}\"}' ${APTLY_URL}/api/publish/:.")
         }
 //      }
     }
@@ -199,7 +199,7 @@ node("docker") {
             [$class: 'BooleanParameterValue', name: 'STACK_DELETE', value: false],
             [$class: 'BooleanParameterValue', name: 'STACK_REUSE', value: false],
             [$class: 'BooleanParameterValue', name: 'TEST_DOCKER_INSTALL', value: false],
-            [$class: 'TextParameterValue', name: 'SALT_OVERRIDES', value: "linux_system_repo: deb [ arch=amd64 trusted=yes ] ${APTLY_REPO_URL} ${APTLY_REPO} main\nlinux_system_repo_priority: 1200\nlinux_system_repo_pin: origin 172.17.49.50"]            
+            [$class: 'TextParameterValue', name: 'SALT_OVERRIDES', value: "linux_system_repo: deb [ arch=amd64 trusted=yes ] ${APTLY_REPO_URL} ${aptlyRepo} main\nlinux_system_repo_priority: 1200\nlinux_system_repo_pin: origin 172.17.49.50"]            
           ])
 
       }
