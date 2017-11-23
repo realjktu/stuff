@@ -210,7 +210,7 @@ node("docker") {
             [$class: 'StringParameterValue', name: 'STACK_TEMPLATE_CREDENTIALS', value: 'gerrit'],
             [$class: 'StringParameterValue', name: 'STACK_TEMPLATE_URL', value: 'ssh://jenkins-mk@gerrit.mcp.mirantis.net:29418/mk/heat-templates'],
             [$class: 'StringParameterValue', name: 'STACK_TEST', value: 'openstack'],
-            [$class: 'StringParameterValue', name: 'STACK_TYPE', value: 'physical'],
+            [$class: 'StringParameterValue', name: 'STACK_TYPE', value: 'heat'],
             [$class: 'StringParameterValue', name: 'TEST_K8S_API_SERVER', value: 'http://127.0.0.1:8080'],
             [$class: 'StringParameterValue', name: 'TEST_K8S_CONFORMANCE_IMAGE', value: 'docker-dev-virtual.docker.mirantis.net/mirantis/kubernetes/k8s-conformance:v1.5.1-3_1482332392819'],
             [$class: 'StringParameterValue', name: 'TEST_TEMPEST_IMAGE', value: 'sandbox-docker-prod-local.docker.mirantis.net/mirantis/rally_tempest:0.1'],
