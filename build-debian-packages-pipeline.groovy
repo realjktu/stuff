@@ -185,7 +185,7 @@ node("docker") {
     }
     if (deployOS) {
       stage("Deploy OpenStack with changed package") {
-        deployBuild = build (job: 'oiurchenko_aio_test', propagate: false,
+        deployBuild = build (job: 'oiurchenko_aio_test', propagate: true,
           parameters: [
             [$class: 'StringParameterValue', name: 'FORMULA_PKG_REVISION', value: 'stable'],
             [$class: 'StringParameterValue', name: 'HEAT_STACK_ENVIRONMENT', value: 'devcloud'],
