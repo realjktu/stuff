@@ -18,7 +18,7 @@ def revisionPostfix
 try {
   revisionPostfix = REVISION_POSTFIX
 } catch (MissingPropertyException e) {
-  revisionPostfix = null
+  revisionPostfix = ''
 }
 
 def aptlyRepo
@@ -132,7 +132,7 @@ node("docker") {
 
     if (uploadAptly && buildPackage) {
 //      lock("aptly-api") {
-        stage("upload") {
+        stage("upload to Aptly") {
           buildSteps = [:]
           sh("curl -X POST -H 'Content-Type: application/json' --data '{\"Name\": \"${aptlyRepo}\"}' ${APTLY_URL}/api/repos")
           debFiles = sh script: "ls build-area/*.deb", returnStdout: true          
@@ -149,7 +149,7 @@ node("docker") {
           parallel buildSteps
         }
 
-        stage("publish") {
+        stage("publish to Aptly") {
           sh("curl -X POST -H 'Content-Type: application/json' --data '{\"SourceKind\": \"local\", \"Sources\": [{\"Name\": \"${aptlyRepo}\"}], \"Architectures\": [\"amd64\"], \"Distribution\": \"${aptlyRepo}\"}' ${APTLY_URL}/api/publish/:.")
         }
 //      }
