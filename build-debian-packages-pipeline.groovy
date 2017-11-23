@@ -81,6 +81,15 @@ node("docker") {
       if (aptlyRepo == '')
         aptlyRepo = buidDescr
       sh("rm -rf src || true")
+      sh('git init src')
+      dir("src") {
+          sh('git fetch --tags --progress https://gerrit.mcp.mirantis.net/salt-formulas/keystone +refs/heads/*:refs/remotes/origin/*')
+          sh('git config remote.origin.url https://gerrit.mcp.mirantis.net/salt-formulas/keystone')
+          sh("git fetch --tags --progress ${SOURCE_URL} ${SOURCE_REFSPEC}")
+          sh('git checkout FETCH_HEAD')
+          sh("git merge origin/${DEBIAN_BRANCH} -m 'Merge with ${DEBIAN_BRANCH}'")
+      }
+/*
       dir("src") {
         def pollBranches = [[name:'FETCH_HEAD']]
         if (debian_branch) {
@@ -95,6 +104,7 @@ node("docker") {
           sh("git merge remotes/origin/${DEBIAN_BRANCH} -m 'Merge with ${DEBIAN_BRANCH}'")
         }
       }
+*/
       debian.cleanup(OS+":"+DIST)
     }
     stage("build-source") {
