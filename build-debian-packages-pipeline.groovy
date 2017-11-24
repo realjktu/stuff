@@ -67,7 +67,6 @@ try {
 def timestamp = common.getDatetime()
 
 node("docker") {
-//  try{
   if (buildPackage) {
     stage("checkout") {
       wrap([$class: 'BuildUser']) {
@@ -141,7 +140,6 @@ node("docker") {
     }
 
     if (uploadAptly && buildPackage) {
-//      lock("aptly-api") {
         stage("upload to Aptly") {
           buildSteps = [:]
           sh("curl -X POST -H 'Content-Type: application/json' --data '{\"Name\": \"${aptlyRepo}\"}' ${APTLY_URL}/api/repos")
@@ -162,8 +160,8 @@ node("docker") {
         stage("publish to Aptly") {
           sh("curl -X POST -H 'Content-Type: application/json' --data '{\"SourceKind\": \"local\", \"Sources\": [{\"Name\": \"${aptlyRepo}\"}], \"Architectures\": [\"amd64\"], \"Distribution\": \"${aptlyRepo}\"}' ${APTLY_URL}/api/publish/:.")
         }
-//      }
     }
+
     if (uploadPpa && buildPackage) {
       stage("upload launchpad") {
         debian.importGpgKey("launchpad-private")
@@ -194,14 +192,6 @@ node("docker") {
         }
     }
 
-//  } catch (Throwable e) {
-     // If there was an error or exception thrown, the build failed
-//     currentBuild.result = "FAILURE"
-//     currentBuild.description = currentBuild.description ? e.message + " " + currentBuild.description : e.message
-//     throw e
-//  } /* finally {
-//     common.sendNotification(currentBuild.result,"",["slack"])
-//  } */
 }
 
 /*
@@ -265,46 +255,3 @@ def buildSourceGbp(dir, image="debian:sid", snapshot=false, gitName='Jenkins', g
         }
     }
 }
-
-
-
-/*
-            parameters: [
-            [$class: 'StringParameterValue', name: 'FORMULA_PKG_REVISION', value: 'stable'],
-            [$class: 'StringParameterValue', name: 'HEAT_STACK_ENVIRONMENT', value: 'devcloud'],
-            [$class: 'StringParameterValue', name: 'HEAT_STACK_PUBLIC_NET', value: 'public'],
-            [$class: 'StringParameterValue', name: 'HEAT_STACK_ZONE', value: 'mcp-oscore'],
-            [$class: 'StringParameterValue', name: 'OPENSTACK_API_CLIENT', value: ''],
-            [$class: 'StringParameterValue', name: 'OPENSTACK_API_CREDENTIALS', value: 'openstack-devcloud-credentials'],
-            [$class: 'StringParameterValue', name: 'OPENSTACK_API_PROJECT', value: 'mcp-oscore'],
-            [$class: 'StringParameterValue', name: 'OPENSTACK_API_PROJECT_DOMAIN', value: 'default'],
-            [$class: 'StringParameterValue', name: 'OPENSTACK_API_PROJECT_ID', value: ''],
-            [$class: 'StringParameterValue', name: 'OPENSTACK_API_URL', value: 'https://cloud-cz.bud.mirantis.net:5000'],
-            [$class: 'StringParameterValue', name: 'OPENSTACK_API_USER_DOMAIN', value: 'default'],
-            [$class: 'StringParameterValue', name: 'OPENSTACK_API_VERSION', value: '3'],
-            [$class: 'StringParameterValue', name: 'OPENSTACK_USER_DOMAIN', value: 'default'],
-            [$class: 'StringParameterValue', name: 'SALT_MASTER_CREDENTIALS', value: 'salt-qa-credentials'],
-            [$class: 'StringParameterValue', name: 'SALT_MASTER_URL', value: ''],
-            [$class: 'StringParameterValue', name: 'STACK_CLEANUP_JOB', value: 'deploy-stack-cleanup'],
-            [$class: 'StringParameterValue', name: 'STACK_INSTALL', value: 'core,openstack,ovs'],
-            [$class: 'StringParameterValue', name: 'STACK_NAME', value: ''],
-            [$class: 'StringParameterValue', name: 'STACK_TEMPLATE', value: 'virtual_mcp11_aio'],
-            [$class: 'StringParameterValue', name: 'STACK_TEMPLATE_BRANCH', value: 'master'],
-            [$class: 'StringParameterValue', name: 'STACK_TEMPLATE_CREDENTIALS', value: 'gerrit'],
-            [$class: 'StringParameterValue', name: 'STACK_TEMPLATE_URL', value: 'ssh://jenkins-mk@gerrit.mcp.mirantis.net:29418/mk/heat-templates'],
-            [$class: 'StringParameterValue', name: 'STACK_TEST', value: 'openstack'],
-            [$class: 'StringParameterValue', name: 'STACK_TYPE', value: 'heat'],
-            [$class: 'StringParameterValue', name: 'TEST_K8S_API_SERVER', value: 'http://127.0.0.1:8080'],
-            [$class: 'StringParameterValue', name: 'TEST_K8S_CONFORMANCE_IMAGE', value: 'docker-dev-virtual.docker.mirantis.net/mirantis/kubernetes/k8s-conformance:v1.5.1-3_1482332392819'],
-            [$class: 'StringParameterValue', name: 'TEST_TEMPEST_IMAGE', value: 'sandbox-docker-prod-local.docker.mirantis.net/mirantis/rally_tempest:0.1'],
-            [$class: 'StringParameterValue', name: 'TEST_TEMPEST_PATTERN', value: ''],
-            [$class: 'StringParameterValue', name: 'TEST_TEMPEST_TARGET', value: ''],
-            [$class: 'StringParameterValue', name: 'STACK_RECLASS_ADDRESS', value: 'https://gerrit.mcp.mirantis.net/salt-models/mcp-virtual-aio'],
-            [$class: 'StringParameterValue', name: 'STACK_RECLASS_BRANCH', value: 'stable/ocata'],
-            [$class: 'BooleanParameterValue', name: 'ASK_ON_ERROR', value: false],
-            [$class: 'BooleanParameterValue', name: 'STACK_DELETE', value: false],
-            [$class: 'BooleanParameterValue', name: 'STACK_REUSE', value: false],
-            [$class: 'BooleanParameterValue', name: 'TEST_DOCKER_INSTALL', value: false],
-            [$class: 'TextParameterValue', name: 'SALT_OVERRIDES', value: "linux_system_repo: deb [ arch=amd64 trusted=yes ] ${APTLY_REPO_URL} ${aptlyRepo} main\nlinux_system_repo_priority: 1200\nlinux_system_repo_pin: origin 172.17.49.50"]            
-          ]
-*/          
