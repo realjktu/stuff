@@ -52,19 +52,19 @@
  */
 
 
-library identifier: 'custom-lib@master', retriever: modernSCM(
+library identifier: 'custom-lib', retriever: modernSCM(
   [$class: 'GitSCMSource',
    remote: 'https://github.com/realjktu/pipeline-library'])
 
 
-common = new com.mirantis1.mk.Common()
-git = new com.mirantis1.mk.Git()
-openstack = new com.mirantis1.mk.Openstack()
-aws = new com.mirantis1.mk.Aws()
-orchestrate = new com.mirantis1.mk.Orchestrate()
-python = new com.mirantis1.mk.Python()
-salt = new com.mirantis1.mk.Salt()
-test = new com.mirantis1.mk.Test()
+common = new library('custom-lib').com.mirantis1.mk.Common()
+git = new library('custom-lib').com.mirantis1.mk.Git()
+openstack = new library('custom-lib').com.mirantis1.mk.Openstack()
+aws = new library('custom-lib').com.mirantis1.mk.Aws()
+orchestrate = new library('custom-lib').com.mirantis1.mk.Orchestrate()
+python = new library('custom-lib').com.mirantis1.mk.Python()
+salt = new library('custom-lib').com.mirantis1.mk.Salt()
+test = new library('custom-lib').com.mirantis1.mk.Test()
 
 _MAX_PERMITTED_STACKS = 2
 overwriteFile = "/srv/salt/reclass/classes/cluster/override.yml"
