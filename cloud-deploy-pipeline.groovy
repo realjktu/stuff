@@ -53,7 +53,7 @@
 
 
 
-library 'custom-lib@master' identifier: 'custom-lib@master', retriever: modernSCM(
+library identifier: 'custom-lib@master', retriever: modernSCM(
   [$class: 'GitSCMSource',
    remote: 'https://github.com/realjktu/pipeline-library'])
 
