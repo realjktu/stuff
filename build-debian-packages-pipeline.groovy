@@ -172,7 +172,7 @@ node("docker") {
     }
     if (deployOS) {
       stage("Deploy OpenStack with changed package") {
-        for TARGET_OS_RELEASE in TARGET_OS_RELEASES.split(','){
+        for (TARGET_OS_RELEASE in TARGET_OS_RELEASES.split(',')) {
           if ()
           deployBuild = build (job: 'oscore-ci-deploy-virtual-aio-${TARGET_OS_RELEASE}', propagate: true,
             parameters: [
