@@ -269,7 +269,7 @@ node(slave_node) {
             stage('Install core infrastructure') {
                 //orchestrate.installFoundationInfra(venvPepper)
                     def master = venvPepper
-                    def salt = new com.mirantis1.mk.Salt()
+//                    def salt = new com.mirantis1.mk.Salt()
                     // NOTE(vsaienko) Apply reclass first, it may update cluster model
                     // apply linux and salt.master salt.minion states afterwards to make sure
                     // correct cluster model is used.
