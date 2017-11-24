@@ -52,19 +52,16 @@
  */
 
 
-library identifier: 'custom-lib@master', retriever: modernSCM(
-  [$class: 'GitSCMSource',
-   remote: 'https://github.com/realjktu/pipeline-library'])
+@Library('oiurchenko-lib')
 
-
-//common = com.mirantis1.mk.Common()
-git = com.mirantis1.mk.Git()
-openstack = com.mirantis1.mk.Openstack()
-aws = com.mirantis1.mk.Aws()
-orchestrate = com.mirantis1.mk.Orchestrate()
-python = com.mirantis1.mk.Python()
+common = com.mirantis.mk.Common()
+git = com.mirantis.mk.Git()
+openstack = com.mirantis.mk.Openstack()
+aws = com.mirantis.mk.Aws()
+orchestrate = com.mirantis.mk.Orchestrate()
+python = com.mirantis.mk.Python()
 salt = com.mirantis1.mk.Salt()
-test = com.mirantis1.mk.Test()
+test = com.mirantis.mk.Test()
 
 _MAX_PERMITTED_STACKS = 2
 overwriteFile = "/srv/salt/reclass/classes/cluster/override.yml"
@@ -272,7 +269,7 @@ node(slave_node) {
             stage('Install core infrastructure') {
                 //orchestrate.installFoundationInfra(venvPepper)
                     def master = venvPepper
-//                    def salt = new com.mirantis1.mk.Salt()
+                    def salt = new com.mirantis1.mk.Salt()
                     // NOTE(vsaienko) Apply reclass first, it may update cluster model
                     // apply linux and salt.master salt.minion states afterwards to make sure
                     // correct cluster model is used.
