@@ -52,9 +52,12 @@
  */
 
 
+library identifier: 'custom-lib@master', retriever: modernSCM(
+  [$class: 'GitSCMSource',
+   remote: 'https://github.com/realjktu/pipeline-library'])
 
 
-common = com.mirantis1.mk.Common()
+common = library('custom-lib').com.mirantis1.mk.Common()
 git = com.mirantis1.mk.Git()
 openstack = com.mirantis1.mk.Openstack()
 aws = com.mirantis1.mk.Aws()
