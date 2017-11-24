@@ -258,8 +258,6 @@ node(slave_node) {
             }
         }
 
-        currentBuild.result = 'FAILURE'
-        eeeeeeeeeeeee
         //
         // Install
         //
@@ -280,9 +278,11 @@ node(slave_node) {
                     salt.runSaltProcessStep(master, '*', 'saltutil.sync_all', [], null, true)
                 
                     salt.enforceState(master, 'I@salt:master', ['salt.master'], true, false, null, false, 120, 2)
+                    sleep(5)
                     salt.enforceState(master, 'I@salt:master', ['salt.minion'], true, false, null, false, 60, 2)
+                    sleep(5)
                     salt.enforceState(master, 'I@salt:master', ['salt.minion'], true)
-                
+                    sleep(5)
                     salt.enforceState(master, '*', ['linux.system'], true)
                     salt.enforceState(master, 'I@linux:system', ['linux', 'openssh', 'ntp'], true)
                     salt.enforceState(master, '*', ['salt.minion'], true, false, null, false, 60, 2)
