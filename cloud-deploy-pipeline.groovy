@@ -51,14 +51,20 @@
  *
  */
 
-common = new com.mirantis.mk.Common()
-git = new com.mirantis.mk.Git()
-openstack = new com.mirantis.mk.Openstack()
-aws = new com.mirantis.mk.Aws()
-orchestrate = new com.mirantis.mk.Orchestrate()
-python = new com.mirantis.mk.Python()
-salt = new com.mirantis.mk.Salt()
-test = new com.mirantis.mk.Test()
+
+library identifier: 'custom-lib@master', retriever: modernSCM(
+  [$class: 'GitSCMSource',
+   remote: 'https://github.com/realjktu/pipeline-library'])
+
+
+common = new com.mirantis1.mk.Common()
+git = new com.mirantis1.mk.Git()
+openstack = new com.mirantis1.mk.Openstack()
+aws = new com.mirantis1.mk.Aws()
+orchestrate = new com.mirantis1.mk.Orchestrate()
+python = new com.mirantis1.mk.Python()
+salt = new com.mirantis1.mk.Salt()
+test = new com.mirantis1.mk.Test()
 
 _MAX_PERMITTED_STACKS = 2
 overwriteFile = "/srv/salt/reclass/classes/cluster/override.yml"
@@ -266,7 +272,7 @@ node(slave_node) {
             stage('Install core infrastructure') {
                 //orchestrate.installFoundationInfra(venvPepper)
                     def master = venvPepper
-                    def salt = new com.mirantis.mk.Salt()
+                    def salt = new com.mirantis1.mk.Salt()
                     // NOTE(vsaienko) Apply reclass first, it may update cluster model
                     // apply linux and salt.master salt.minion states afterwards to make sure
                     // correct cluster model is used.
@@ -278,11 +284,9 @@ node(slave_node) {
                     salt.runSaltProcessStep(master, '*', 'saltutil.sync_all', [], null, true)
                 
                     salt.enforceState(master, 'I@salt:master', ['salt.master'], true, false, null, false, 120, 2)
-                    sleep(5)
                     salt.enforceState(master, 'I@salt:master', ['salt.minion'], true, false, null, false, 60, 2)
-                    sleep(5)
                     salt.enforceState(master, 'I@salt:master', ['salt.minion'], true)
-                    sleep(5)
+
                     salt.enforceState(master, '*', ['linux.system'], true)
                     salt.enforceState(master, 'I@linux:system', ['linux', 'openssh', 'ntp'], true)
                     salt.enforceState(master, '*', ['salt.minion'], true, false, null, false, 60, 2)
@@ -551,3 +555,4 @@ node(slave_node) {
         }
     }
 }
+
