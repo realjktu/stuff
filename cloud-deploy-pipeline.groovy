@@ -54,14 +54,14 @@
 
 @Library('oiurchenko-lib')
 
-common = com.mirantis.mk.Common()
-git = com.mirantis.mk.Git()
-openstack = com.mirantis.mk.Openstack()
-aws = com.mirantis.mk.Aws()
-orchestrate = com.mirantis.mk.Orchestrate()
-python = com.mirantis.mk.Python()
-salt = com.mirantis1.mk.Salt()
-test = com.mirantis.mk.Test()
+common = new com.mirantis.mk.Common()
+git = new com.mirantis.mk.Git()
+openstack = new com.mirantis.mk.Openstack()
+aws = new com.mirantis.mk.Aws()
+orchestrate = new com.mirantis.mk.Orchestrate()
+python = new com.mirantis.mk.Python()
+salt = new com.mirantis1.mk.Salt()
+test = new com.mirantis.mk.Test()
 
 _MAX_PERMITTED_STACKS = 2
 overwriteFile = "/srv/salt/reclass/classes/cluster/override.yml"
