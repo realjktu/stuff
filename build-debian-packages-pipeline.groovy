@@ -172,14 +172,14 @@ node("docker") {
     }
     if (deployOS) {
       stage("Deploy OpenStack with changed package") {
-        //for (TARGET_OS_RELEASE in params.TARGET_OS_RELEASES.split(',')) {
-          TARGET_OS_RELEASE = 'ocata'
-          deployBuild = build (job: "oscore-ci-deploy-virtual-aio-${TARGET_OS_RELEASE}", propagate: true,
-            parameters: [
-              [$class: 'StringParameterValue', name: 'FORMULA_PKG_REVISION', value: 'stable'],
-              [$class: 'TextParameterValue', name: 'SALT_OVERRIDES', value: "linux_system_repo: deb [ arch=amd64 trusted=yes ] ${APTLY_REPO_URL} ${aptlyRepo} main\nlinux_system_repo_priority: 1200\nlinux_system_repo_pin: origin 172.17.49.50"]
-            ])
-        //}
+        for (TARGET_OS_RELEASE in params.TARGET_OS_RELEASES.split(',')) {
+          println("!${TARGET_OS_RELEASE}")
+          //deployBuild = build (job: "oscore-ci-deploy-virtual-aio-${TARGET_OS_RELEASE}", propagate: true,
+          //  parameters: [
+          //    [$class: 'StringParameterValue', name: 'FORMULA_PKG_REVISION', value: 'stable'],
+          //    [$class: 'TextParameterValue', name: 'SALT_OVERRIDES', value: "linux_system_repo: deb [ arch=amd64 trusted=yes ] ${APTLY_REPO_URL} ${aptlyRepo} main\nlinux_system_repo_priority: 1200\nlinux_system_repo_pin: origin 172.17.49.50"]
+          //  ])
+        }
       }
     }
 
