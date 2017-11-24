@@ -258,6 +258,8 @@ node(slave_node) {
             }
         }
 
+        currentBuild.result = 'FAILURE'
+        eeeeeeeeeeeee
         //
         // Install
         //
