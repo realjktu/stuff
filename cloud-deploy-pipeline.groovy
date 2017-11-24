@@ -52,10 +52,12 @@
  */
 
 
-library identifier: 'custom-lib@master', retriever: modernSCM(
+
+library 'custom-lib@master' identifier: 'custom-lib@master', retriever: modernSCM(
   [$class: 'GitSCMSource',
    remote: 'https://github.com/realjktu/pipeline-library'])
 
+@Library('custom-lib@master')
 
 common = new library('custom-lib').com.mirantis1.mk.Common()
 git = new library('custom-lib').com.mirantis1.mk.Git()
