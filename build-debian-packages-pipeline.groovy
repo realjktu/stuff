@@ -191,7 +191,7 @@ node("docker") {
 //  } /* finally {
 //     common.sendNotification(currentBuild.result,"",["slack"])
 //  } */
-}
+
 
 /*
  * Build source package using git-buildpackage
