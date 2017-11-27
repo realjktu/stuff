@@ -290,6 +290,8 @@ node(slave_node) {
                     salt.enforceState(master, '*', ['salt.minion'], true, false, null, false, 60, 2)
                     sleep(5)
                     salt.enforceState(master, '*', ['linux.network.host'], true)
+                    salt.runSaltProcessStep(master, '*', 'saltutil.refresh_pillar', [], null, true)
+                    salt.runSaltProcessStep(master, '*', 'saltutil.sync_all', [], null, true)
 
 
                 if (common.checkContains('STACK_INSTALL', 'kvm')) {
