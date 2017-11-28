@@ -281,8 +281,8 @@ node(slave_node) {
                     salt.runSaltProcessStep(master, '*', 'saltutil.sync_all', [], null, true)
                 
                     salt.enforceState(master, 'I@salt:master', ['salt.master'], true, false, null, false, 120, 2)
-                    salt.enforceState(master, 'I@salt:master', ['salt.minion'], true, false, null, false, 60, 2)
-                    //salt.enforceState(master, 'I@salt:master', ['salt.minion'], true)
+                    //salt.enforceState(master, 'I@salt:master', ['salt.minion'], true, false, null, false, 60, 2)
+                    salt.enforceState(master, 'I@salt:master', ['salt.minion'], true)
                     salt.enforceState(master, 'I@salt:master', ['salt.minion'], true, false, null, false, 60, 2)
 
                     salt.enforceState(master, '*', ['linux.system'], true)
