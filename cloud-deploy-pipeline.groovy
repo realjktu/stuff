@@ -253,6 +253,7 @@ node(slave_node) {
             python.setupPepperVirtualenv(venvPepper, SALT_MASTER_URL, SALT_MASTER_CREDENTIALS)
         }
 
+eeeeeeeeeeeeeeeeeeeeeeeeeee
 
         // Set up override params
         if (common.validInputParam('SALT_OVERRIDES')) {
