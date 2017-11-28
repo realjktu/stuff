@@ -281,6 +281,8 @@ node(slave_node) {
 
                     salt.enforceState(master, 'I@salt:master', ['salt.minion'], true, false, null, false, 60, 2)
                     salt.enforceState(master, 'I@salt:master', ['salt.minion'], true)
+                    salt.runSaltProcessStep(master, '*', 'saltutil.refresh_pillar', [], null, true)
+                    salt.runSaltProcessStep(master, '*', 'saltutil.sync_all', [], null, true)
 
                     salt.enforceState(master, '*', ['linux.system'], true)
                     salt.enforceState(master, 'I@linux:system', ['linux', 'openssh', 'ntp'], true)
