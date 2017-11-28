@@ -274,15 +274,12 @@ node(slave_node) {
                     // apply linux and salt.master salt.minion states afterwards to make sure
                     // correct cluster model is used.
                     salt.enforceState(master, 'I@salt:master', ['reclass'], true)
-                
                     salt.enforceState(master, 'I@salt:master', ['linux.system'], true)
-                
+                    salt.enforceState(master, 'I@salt:master', ['salt.master'], true, false, null, false, 120, 2)
                     salt.runSaltProcessStep(master, '*', 'saltutil.refresh_pillar', [], null, true)
                     salt.runSaltProcessStep(master, '*', 'saltutil.sync_all', [], null, true)
-                
-                    salt.enforceState(master, 'I@salt:master', ['salt.master'], true, false, null, false, 120, 2)
+
                     salt.enforceState(master, 'I@salt:master', ['salt.minion'], true, false, null, false, 60, 2)
-                    //salt.enforceState(master, 'I@salt:master', ['salt.minion'], true, false, null, false, 60, 2)
                     salt.enforceState(master, 'I@salt:master', ['salt.minion'], true)
 
                     salt.enforceState(master, '*', ['linux.system'], true)
@@ -290,8 +287,6 @@ node(slave_node) {
                     salt.enforceState(master, '*', ['salt.minion'], true, false, null, false, 60, 2)
                     sleep(5)
                     salt.enforceState(master, '*', ['linux.network.host'], true)
-                    salt.runSaltProcessStep(master, '*', 'saltutil.refresh_pillar', [], null, true)
-                    salt.runSaltProcessStep(master, '*', 'saltutil.sync_all', [], null, true)
 
 
                 if (common.checkContains('STACK_INSTALL', 'kvm')) {
