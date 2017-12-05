@@ -170,7 +170,7 @@ node(slave_node) {
                         envParams.put('cfg_formula_pkg_revision', FORMULA_PKG_REVISION)
                     }
                     if (common.validInputParam('BOOTSTRAP_EXTRA_REPO_PARAMS')) {
-                        common.infoMsg("Setting additional repo during bootstrap to ${BOOTSTRAP_EXTRA_REPO}")
+                        common.infoMsg("Setting additional repo during bootstrap to ${BOOTSTRAP_EXTRA_REPO_PARAMS}")
                         envParams.put('cfg_bootstrap_extra_repo_params', BOOTSTRAP_EXTRA_REPO_PARAMS)
                     }
 
