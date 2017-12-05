@@ -169,15 +169,9 @@ node(slave_node) {
                         common.infoMsg("Setting formulas revision to ${FORMULA_PKG_REVISION}")
                         envParams.put('cfg_formula_pkg_revision', FORMULA_PKG_REVISION)
                     }
-                    if (common.validInputParam('BOOTSTRAP_EXTRA_REPO')) {
+                    if (common.validInputParam('BOOTSTRAP_EXTRA_REPO_PARAMS')) {
                         common.infoMsg("Setting additional repo during bootstrap to ${BOOTSTRAP_EXTRA_REPO}")
-                        envParams.put('cfg_bootstrap_extra_repo', BOOTSTRAP_EXTRA_REPO)
-                        if (common.validInputParam('BOOTSTRAP_EXTRA_REPO_PRIORITY')) {
-                            envParams.put('cfg_bootstrap_extra_repo_priority', BOOTSTRAP_EXTRA_REPO_PRIORITY)
-                        }
-                        if (common.validInputParam('BOOTSTRAP_EXTRA_REPO_PIN')) {
-                            envParams.put('cfg_bootstrap_extra_repo_pin', BOOTSTRAP_EXTRA_REPO_PIN)
-                        }
+                        envParams.put('cfg_bootstrap_extra_repo_params', BOOTSTRAP_EXTRA_REPO_PARAMS)
                     }
 
                     openstack.createHeatStack(openstackCloud, STACK_NAME, STACK_TEMPLATE, envParams, HEAT_STACK_ENVIRONMENT, venv)
