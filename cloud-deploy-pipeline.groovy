@@ -280,7 +280,7 @@ node(slave_node) {
                     salt.cmdRun(master, 'cfg01*', 'rm -f /tmp/test_source')
                 }
 
-                exxxxxxiiiit!!!!
+                exxxxxxiiiit
 
 //                    def salt = new com.mirantis1.mk.Salt()
                     // NOTE(vsaienko) Apply reclass first, it may update cluster model
