@@ -275,8 +275,8 @@ node(slave_node) {
                 def salt = new com.mirantis1.mk.Salt()
                 def master = venvPepper
                 if (salt.testTarget(master, 'I@rabbitmq:server') && salt.testTarget(master, 'I@baremetal_simulator:enabled')) {                    
-                    salt.cmdRun(master, 'cfg01*', 'salt -C "I@rabbitmq:server" test.ping | grep ":" | xargs -I{} scp {}/tmp/test_source /tmp/', false)
-                    salt.cmdRun(master, 'cfg01*', 'salt -C "I@baremetal_simulator:enabled" test.ping | grep ":" | xargs -I{} scp /tmp/test_source {}/tmp/')
+                    salt.cmdRun(master, 'cfg01*', 'salt -C "I@rabbitmq:server" test.ping | grep ":" | xargs -I{} scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null {}/tmp/test_source /tmp/', false)
+                    salt.cmdRun(master, 'cfg01*', 'salt -C "I@baremetal_simulator:enabled" test.ping | grep ":" | xargs -I{} scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null /tmp/test_source {}/tmp/')
                     //salt.cmdRun(master, 'cfg01*', 'rm -f /tmp/test_source')
                 }
 
