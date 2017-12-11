@@ -274,6 +274,9 @@ node(slave_node) {
                 //orchestrate.installFoundationInfra(venvPepper)
                 def salt = new com.mirantis1.mk.Salt()
                 def master = venvPepper
+                
+                salt.enforceState(master, '*', ['linux.system'], true)
+
                 // Install dogtag server service
                 if (salt.testTarget(master, 'I@dogtag:server and *01*')) {
                     salt.enforceState(master, 'I@dogtag:server and *01*', 'dogtag.server', true)
