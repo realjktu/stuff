@@ -52,19 +52,16 @@
  */
 
 
-library identifier: 'custom-lib@master', retriever: modernSCM(
-  [$class: 'GitSCMSource',
-   remote: 'https://github.com/realjktu/pipeline-library'])
+@Library('oiurchenko-lib')
 
-
-//common = com.mirantis1.mk.Common()
-git = com.mirantis1.mk.Git()
-openstack = com.mirantis1.mk.Openstack()
-aws = com.mirantis1.mk.Aws()
-orchestrate = com.mirantis1.mk.Orchestrate()
-python = com.mirantis1.mk.Python()
-salt = com.mirantis1.mk.Salt()
-test = com.mirantis1.mk.Test()
+common = new com.mirantis.mk.Common()
+git = new com.mirantis.mk.Git()
+openstack = new com.mirantis.mk.Openstack()
+aws = new com.mirantis.mk.Aws()
+orchestrate = new com.mirantis.mk.Orchestrate()
+python = new com.mirantis.mk.Python()
+salt = new com.mirantis1.mk.Salt()
+test = new com.mirantis.mk.Test()
 
 _MAX_PERMITTED_STACKS = 2
 overwriteFile = "/srv/salt/reclass/classes/cluster/override.yml"
@@ -172,6 +169,10 @@ node(slave_node) {
                         common.infoMsg("Setting formulas revision to ${FORMULA_PKG_REVISION}")
                         envParams.put('cfg_formula_pkg_revision', FORMULA_PKG_REVISION)
                     }
+                    if (common.validInputParam('BOOTSTRAP_EXTRA_REPO_PARAMS')) {
+                        common.infoMsg("Setting additional repo during bootstrap to ${BOOTSTRAP_EXTRA_REPO_PARAMS}")
+                        envParams.put('cfg_bootstrap_extra_repo_params', BOOTSTRAP_EXTRA_REPO_PARAMS)
+                    }
 
                     openstack.createHeatStack(openstackCloud, STACK_NAME, STACK_TEMPLATE, envParams, HEAT_STACK_ENVIRONMENT, venv)
                 }
@@ -273,6 +274,7 @@ node(slave_node) {
                 //orchestrate.installFoundationInfra(venvPepper)
                 if (salt.testTarget(master, 'I@rabbitmq:server') && salt.testTarget(master, 'I@baremetal_simulator:enabled')) {
                     def master = venvPepper
+<<<<<<< HEAD
                     salt.cmdRun(master, 'cfg01*', 'salt -C "I@rabbitmq:server" test.ping | grep ":"" | xargs -I{} scp {}/tmp/test_source /tmp/')
                     salt.cmdRun(master, 'cfg01*', 'salt -C "I@baremetal_simulator:enabled" test.ping | grep ":"" | xargs -I{} scp /tmp/test_source {}/tmp/')
                     salt.cmdRun(master, 'cfg01*', 'rm -f /tmp/test_source')
@@ -281,19 +283,22 @@ node(slave_node) {
                 exxxxxxiiiit!!!!
 
 //                    def salt = new com.mirantis1.mk.Salt()
+=======
+                    def salt = new com.mirantis1.mk.Salt()
+>>>>>>> 6b26f89689c37c4c26e060b51c5cdbf8791f60e9
                     // NOTE(vsaienko) Apply reclass first, it may update cluster model
                     // apply linux and salt.master salt.minion states afterwards to make sure
                     // correct cluster model is used.
                     salt.enforceState(master, 'I@salt:master', ['reclass'], true)
-                
                     salt.enforceState(master, 'I@salt:master', ['linux.system'], true)
-                
+                    salt.enforceState(master, 'I@salt:master', ['salt.master'], true, false, null, false, 120, 2)
                     salt.runSaltProcessStep(master, '*', 'saltutil.refresh_pillar', [], null, true)
                     salt.runSaltProcessStep(master, '*', 'saltutil.sync_all', [], null, true)
-                
-                    salt.enforceState(master, 'I@salt:master', ['salt.master'], true, false, null, false, 120, 2)
+
                     salt.enforceState(master, 'I@salt:master', ['salt.minion'], true, false, null, false, 60, 2)
                     salt.enforceState(master, 'I@salt:master', ['salt.minion'], true)
+                    salt.runSaltProcessStep(master, '*', 'saltutil.refresh_pillar', [], null, true)
+                    salt.runSaltProcessStep(master, '*', 'saltutil.sync_all', [], null, true)
 
                     salt.enforceState(master, '*', ['linux.system'], true)
                     salt.enforceState(master, 'I@linux:system', ['linux', 'openssh', 'ntp'], true)
