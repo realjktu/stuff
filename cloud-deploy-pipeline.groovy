@@ -274,10 +274,17 @@ node(slave_node) {
                 //orchestrate.installFoundationInfra(venvPepper)
                 def salt = new com.mirantis1.mk.Salt()
                 def master = venvPepper
-                if (salt.testTarget(master, 'I@rabbitmq:server') && salt.testTarget(master, 'I@baremetal_simulator:enabled')) {                    
-                    salt.cmdRun(master, 'cfg01*', 'salt -C "I@rabbitmq:server" test.ping | grep ":" | xargs -I{} scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null {}/tmp/test_source /tmp/', false)
-                    salt.cmdRun(master, 'cfg01*', 'salt -C "I@baremetal_simulator:enabled" test.ping | grep ":" | xargs -I{} scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null /tmp/test_source {}/tmp/')
-                    //salt.cmdRun(master, 'cfg01*', 'rm -f /tmp/test_source')
+                // Install dogtag server service
+                if (salt.testTarget(master, 'I@dogtag:server and *01*')) {
+                    salt.enforceState(master, 'I@dogtag:server and *01*', 'dogtag.server', true)
+                }
+
+                // Copy DogTag root cert from dogtag server to Barbican config.
+                if (salt.testTarget(master, 'I@dogtag:server') && salt.testTarget(master, 'I@baremetal_simulator:enabled')) {                    
+                    salt.cmdRun(master, 'cfg01*', 'salt -C "I@dogtag:server and *01*" test.ping | grep ":" | xargs -I{} scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null {}/etc/dogtag/kra_admin_cert.pem /tmp')
+                    salt.cmdRun(master, 'I@baremetal_simulator:enabled', 'mkdir /etc/barbican')
+                    salt.cmdRun(master, 'cfg01*', 'salt -C "I@baremetal_simulator:enabled" test.ping | grep ":" | xargs -I{} scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null /tmp/kra_admin_cert.pem {}/etc/barbican')
+                    salt.cmdRun(master, 'cfg01*', 'rm -f /tmp/kra_admin_cert.pem')
                 }
 
                 exxxxxxiiiit
