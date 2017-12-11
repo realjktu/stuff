@@ -271,7 +271,15 @@ node(slave_node) {
         if (common.checkContains('STACK_INSTALL', 'core')) {
             stage('Install core infrastructure') {
                 //orchestrate.installFoundationInfra(venvPepper)
+                if (salt.testTarget(master, 'I@rabbitmq:server') && salt.testTarget(master, 'I@baremetal_simulator:enabled')) {
                     def master = venvPepper
+                    salt.cmdRun(master, 'cfg01*', 'salt -C "I@rabbitmq:server" test.ping | grep ":"" | xargs -I{} scp {}/tmp/test_source /tmp/')
+                    salt.cmdRun(master, 'cfg01*', 'salt -C "I@baremetal_simulator:enabled" test.ping | grep ":"" | xargs -I{} scp /tmp/test_source {}/tmp/')
+                    salt.cmdRun(master, 'cfg01*', 'rm -f /tmp/test_source')
+                }
+
+                exxxxxxiiiit!!!!
+
 //                    def salt = new com.mirantis1.mk.Salt()
                     // NOTE(vsaienko) Apply reclass first, it may update cluster model
                     // apply linux and salt.master salt.minion states afterwards to make sure
