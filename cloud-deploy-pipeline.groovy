@@ -58,7 +58,7 @@ common = new com.mirantis.mk.Common()
 git = new com.mirantis.mk.Git()
 openstack = new com.mirantis.mk.Openstack()
 aws = new com.mirantis.mk.Aws()
-orchestrate = new com.mirantis.mk.Orchestrate()
+orchestrate = new com.mirantis1.mk.Orchestrate()
 python = new com.mirantis.mk.Python()
 salt = new com.mirantis1.mk.Salt()
 test = new com.mirantis.mk.Test()
@@ -271,49 +271,7 @@ node(slave_node) {
 
         if (common.checkContains('STACK_INSTALL', 'core')) {
             stage('Install core infrastructure') {
-                //orchestrate.installFoundationInfra(venvPepper)
-                def salt = new com.mirantis1.mk.Salt()
-                def master = venvPepper
-                salt.enforceState(master, 'cfg01*', ['salt.minion'], true) 
-                salt.enforceState(master, '*', ['linux.system'], true)
-
-                // Install dogtag server service
-                if (salt.testTarget(master, 'I@dogtag:server and *01*')) {
-                    salt.enforceState(master, 'I@dogtag:server and *01*', 'dogtag.server', true)
-                }
-
-                // Copy DogTag root cert from dogtag server to Barbican config.
-                if (salt.testTarget(master, 'I@dogtag:server') && salt.testTarget(master, 'I@baremetal_simulator:enabled')) {                    
-                    salt.cmdRun(master, 'cfg01*', 'salt -C "I@dogtag:server and *01*" test.ping | grep ":" | xargs -I{} scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null {}/etc/dogtag/kra_admin_cert.pem /tmp')
-                    salt.cmdRun(master, 'I@baremetal_simulator:enabled', 'mkdir /etc/barbican')
-                    salt.cmdRun(master, 'cfg01*', 'salt -C "I@baremetal_simulator:enabled" test.ping | grep ":" | xargs -I{} scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null /tmp/kra_admin_cert.pem {}/etc/barbican')
-                    salt.cmdRun(master, 'cfg01*', 'rm -f /tmp/kra_admin_cert.pem')
-                }
-
-                exxxxxxiiiit
-
-//                    def salt = new com.mirantis1.mk.Salt()
-                    // NOTE(vsaienko) Apply reclass first, it may update cluster model
-                    // apply linux and salt.master salt.minion states afterwards to make sure
-                    // correct cluster model is used.
-                    salt.enforceState(master, 'I@salt:master', ['reclass'], true)
-                    salt.enforceState(master, 'I@salt:master', ['linux.system'], true)
-                    salt.enforceState(master, 'I@salt:master', ['salt.master'], true, false, null, false, 120, 2)
-                    salt.runSaltProcessStep(master, '*', 'saltutil.refresh_pillar', [], null, true)
-                    salt.runSaltProcessStep(master, '*', 'saltutil.sync_all', [], null, true)
-
-                    salt.enforceState(master, 'I@salt:master', ['salt.minion'], true, false, null, false, 60, 2)
-                    salt.enforceState(master, 'I@salt:master', ['salt.minion'], true)
-                    salt.runSaltProcessStep(master, '*', 'saltutil.refresh_pillar', [], null, true)
-                    salt.runSaltProcessStep(master, '*', 'saltutil.sync_all', [], null, true)
-
-                    salt.enforceState(master, '*', ['linux.system'], true)
-                    salt.enforceState(master, 'I@linux:system', ['linux', 'openssh', 'ntp'], true)
-                    salt.enforceState(master, '*', ['salt.minion'], true, false, null, false, 60, 2)
-                    sleep(5)
-                    salt.enforceState(master, '*', ['linux.network.host'], true)
-
-
+                orchestrate.installFoundationInfra(venvPepper)
                 if (common.checkContains('STACK_INSTALL', 'kvm')) {
                     orchestrate.installInfraKvm(venvPepper)
                     orchestrate.installFoundationInfra(venvPepper)
