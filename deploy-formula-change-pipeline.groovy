@@ -35,6 +35,13 @@ try {
   buildPackage = true
 }
 
+def aptlyRepo
+try {
+  aptlyRepo = APTLY_REPO
+} catch (MissingPropertyException e) {
+  aptlyRepo = null
+}
+
 
 def timestamp = common.getDatetime()
 
@@ -51,7 +58,7 @@ node('python') {
     currentBuild.description = buidDescr
       if (aptlyRepo == '')
         aptlyRepo = buidDescr
-        
+
     stage("Build packages") {
         for (source in SOURCES.tokenize('\n')) {
         	sourceArr=source.tokenize(' ')
