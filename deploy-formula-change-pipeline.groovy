@@ -28,7 +28,6 @@ try {
   lintianCheck = true
 }
 
-
 def buildPackage
 try {
   buildPackage = BUILD_PACKAGE.toBoolean()
@@ -42,6 +41,9 @@ def timestamp = common.getDatetime()
 
 node('python') {
 
+    currentBuild.description = buidDescr
+      if (aptlyRepo == '')
+        aptlyRepo = buidDescr
     stage("Build packages") {
         for (source in SOURCES.tokenize('\n')) {
         	sourceArr=source.tokenize(' ')
@@ -61,9 +63,35 @@ node('python') {
           		projectName: 'oscore-ci-build-formula-change',
           		filter: 'build-area/*.deb',
           		selector: [$class: 'SpecificBuildSelector', buildNumber: '20'],
+          		target: 'build-area',
           		]);
+            archiveArtifacts artifacts: "build-area/*.deb"
         }
     }
+
+    if (uploadAptly && buildPackage) {
+        stage("upload to Aptly") {
+          buildSteps = [:]
+          sh("curl -X POST -H 'Content-Type: application/json' --data '{\"Name\": \"${aptlyRepo}\"}' ${APTLY_URL}/api/repos")
+          debFiles = sh script: "ls build-area/*.deb", returnStdout: true          
+          for (file in debFiles.tokenize()) {
+            workspace = common.getWorkspace()
+            def fh = new File((workspace+"/"+file).trim())
+            buildSteps[fh.name.split('_')[0]] = aptly.uploadPackageStep(
+                  "build-area/"+fh.name,
+                  APTLY_URL,
+                  aptlyRepo,
+                  true
+              )
+          }
+          parallel buildSteps
+        }
+
+        stage("publish to Aptly") {
+          sh("curl -X POST -H 'Content-Type: application/json' --data '{\"SourceKind\": \"local\", \"Sources\": [{\"Name\": \"${aptlyRepo}\"}], \"Architectures\": [\"amd64\"], \"Distribution\": \"${aptlyRepo}\"}' ${APTLY_URL}/api/publish/:.")
+        }
+    }
+
 
 }
 
