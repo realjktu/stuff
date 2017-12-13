@@ -54,6 +54,9 @@ node('python') {
             } else {
                 error("Cannot build ${source}, please check ${deployBuild.absoluteUrl}")
             }
+            for (def e in mapToList(deployBuild)){
+    			println "key = ${e.key}, value = ${e.value}"
+			}
             step ([$class: 'CopyArtifact',
           		projectName: '${deployBuild.jobName}',
           		filter: 'build-area/*.deb',
