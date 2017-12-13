@@ -80,9 +80,9 @@ node('python') {
             }
 
             step ([$class: 'CopyArtifact',
-          		projectName: "${deployBuild.getProjectName}",
+          		projectName: "${deployBuild.getProjectName()}",
           		filter: 'build-area/*.deb',
-          		selector: [$class: 'SpecificBuildSelector', buildNumber: "${deployBuild.getId}"],          		
+          		selector: [$class: 'SpecificBuildSelector', buildNumber: "${deployBuild.getId()}"],          		
           		]);
             archiveArtifacts artifacts: "build-area/*.deb"
         }
