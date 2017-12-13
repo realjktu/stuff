@@ -82,11 +82,11 @@ node("docker") {
       sh("rm -rf src || true")
       sh('git init src')
       dir("src") {
-          sh("git fetch --tags --progress ${SOURCE_URL} +refs/heads/*:refs/remotes/origin/*")
+          sh("git fetch --tags ${SOURCE_URL} +refs/heads/*:refs/remotes/origin/*")
           sh("git config remote.origin.url ${SOURCE_URL}")
-          sh("git fetch --tags --progress ${SOURCE_URL} ${SOURCE_REFSPEC}")
+          sh("git fetch --tags ${SOURCE_URL} ${SOURCE_REFSPEC}")
           sh("git checkout FETCH_HEAD")
-          sh("git merge origin/${DEBIAN_BRANCH} -m 'Merge with ${DEBIAN_BRANCH}'")
+          sh("git merge origin/${DEBIAN_BRANCH} -m 'Merge with ${DEBIAN_BRANCH}' || exit 0")
       }
 /*
       dir("src") {
@@ -173,7 +173,7 @@ node("docker") {
     if (OPENSTACK_RELEASES) {
         saltOverrides="linux_system_repo: deb [ arch=amd64 trusted=yes ] ${APTLY_REPO_URL} ${aptlyRepo} main\nlinux_system_repo_priority: 1200\nlinux_system_repo_pin: origin 172.17.49.50"
         for (OPENSTACK_RELEASE in OPENSTACK_RELEASES.tokenize(',')) {
-            stage("Deploy OpenStack ${OPENSTACK_RELEASE} release with changed formula") {              
+            stage("Deploy OpenStack ${OPENSTACK_RELEASE} release with changed formula") {
                 deployBuild = build(job: "oscore-ci-deploy-virtual-aio-${OPENSTACK_RELEASE}", propagate: false, parameters: [
                 //deployBuild = build(job: "oiurchenko_aio_test", propagate: false, parameters: [
                     [$class: 'StringParameterValue', name: 'STACK_RECLASS_BRANCH', value: "stable/${OPENSTACK_RELEASE}"],
