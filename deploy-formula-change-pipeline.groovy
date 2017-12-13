@@ -42,6 +42,13 @@ try {
   aptlyRepo = null
 }
 
+def uploadAptly
+try {
+  uploadAptly = UPLOAD_APTLY.toBoolean()
+} catch (MissingPropertyException e) {
+  uploadAptly = true
+}
+
 
 def timestamp = common.getDatetime()
 
@@ -77,8 +84,7 @@ node('python') {
             step ([$class: 'CopyArtifact',
           		projectName: 'oscore-ci-build-formula-change',
           		filter: 'build-area/*.deb',
-          		selector: [$class: 'SpecificBuildSelector', buildNumber: '20'],
-          		target: 'build-area',
+          		selector: [$class: 'SpecificBuildSelector', buildNumber: '20'],          		
           		]);
             archiveArtifacts artifacts: "build-area/*.deb"
         }
