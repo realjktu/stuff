@@ -54,7 +54,13 @@ node('python') {
             } else {
                 error("Cannot build ${source}, please check ${deployBuild.absoluteUrl}")
             }
+            step ([$class: 'CopyArtifact',
+          		projectName: '${deployBuild.jobName}',
+          		filter: 'build-area/*.deb',
+          		selector: [$class: 'SpecificBuildSelector', buildNumber: '${deployBuild.buildNumber}'],
+          		]);
         }
     }
 
 }
+
