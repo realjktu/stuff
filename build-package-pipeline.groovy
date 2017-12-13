@@ -56,8 +56,6 @@ node("docker") {
         }
       }
       currentBuild.description = buidDescr
-      if (aptlyRepo == '')
-        aptlyRepo = buidDescr
       sh("rm -rf src || true")
       sh('git init src')
       dir("src") {
