@@ -49,11 +49,6 @@ node('python') {
                 [$class: 'StringParameterValue', name: 'SOURCE_URL', value: "${sourceArr[0]}"],
                 [$class: 'StringParameterValue', name: 'SOURCE_REFSPEC', value: "${sourceArr[1]}"],
             ])
-            if (deployBuild.result == 'SUCCESS'){
-                common.infoMsg("${OPENSTACK_RELEASE} has been deployed successfully")
-            } else {
-                error("Deployment of ${OPENSTACK_RELEASE}, please check ${deployBuild.absoluteUrl}")            
-            }
         }
     }
 
