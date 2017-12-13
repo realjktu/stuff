@@ -50,16 +50,13 @@ node('python') {
                 [$class: 'StringParameterValue', name: 'SOURCE_REFSPEC', value: "${sourceArr[1]}"],
             ])
             if (deployBuild.result == 'SUCCESS'){
-                common.infoMsg("${source} has been build successfully")
+                common.infoMsg("${source} has been build successfully ${deployBuild}")
             } else {
                 error("Cannot build ${source}, please check ${deployBuild.absoluteUrl}")
             }
-			deployBuild.each { animal, animalSound ->
-    			println "${animal} has the sound ${animalSound}"
-			};
-			
+
             step ([$class: 'CopyArtifact',
-          		projectName: '${deployBuild.jobName}',
+          		projectName: 'oscore-ci-build-formula-change',
           		filter: 'build-area/*.deb',
           		selector: [$class: 'SpecificBuildSelector', buildNumber: '${deployBuild.buildNumber}'],
           		]);
