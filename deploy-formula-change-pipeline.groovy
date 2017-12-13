@@ -41,9 +41,17 @@ def timestamp = common.getDatetime()
 
 node('python') {
 
+    wrap([$class: 'BuildUser']) {
+        if (env.BUILD_USER_ID) {
+          buidDescr = "${env.BUILD_USER_ID}-${JOB_NAME}-${BUILD_NUMBER}"
+        } else {
+          buidDescr = "jenkins-${JOB_NAME}-${BUILD_NUMBER}"
+        }
+    }
     currentBuild.description = buidDescr
       if (aptlyRepo == '')
         aptlyRepo = buidDescr
+        
     stage("Build packages") {
         for (source in SOURCES.tokenize('\n')) {
         	sourceArr=source.tokenize(' ')
