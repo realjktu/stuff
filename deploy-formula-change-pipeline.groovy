@@ -50,13 +50,14 @@ node('python') {
                 [$class: 'StringParameterValue', name: 'SOURCE_REFSPEC', value: "${sourceArr[1]}"],
             ])
             if (deployBuild.result == 'SUCCESS'){
-                common.infoMsg("${source} has been build successfully ${deployBuild}")
+                common.infoMsg("${source} has been build successfully")
             } else {
                 error("Cannot build ${source}, please check ${deployBuild.absoluteUrl}")
             }
-            for (def e in mapToList(deployBuild)){
-    			println "key = ${e.key}, value = ${e.value}"
-			}
+			deployBuild.each { animal, animalSound ->
+    			println "${animal} has the sound ${animalSound}"
+			};
+			
             step ([$class: 'CopyArtifact',
           		projectName: '${deployBuild.jobName}',
           		filter: 'build-area/*.deb',
@@ -65,14 +66,5 @@ node('python') {
         }
     }
 
-}
-
-@NonCPS
-def mapToList(depmap) {
-    def dlist = []
-    for (def entry2 in depmap) {
-        dlist.add(new java.util.AbstractMap.SimpleImmutableEntry(entry2.key, entry2.value))
-    }
-    dlist
 }
 
