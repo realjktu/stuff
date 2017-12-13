@@ -45,6 +45,7 @@ node('python') {
     stage("Build packages") {
         for (source in SOURCES.tokenize('\n')) {
         	sourceArr=source.tokenize(' ')
+        	/*
             deployBuild = build(job: "oscore-ci-build-formula-change", propagate: false, parameters: [                
                 [$class: 'StringParameterValue', name: 'SOURCE_URL', value: "${sourceArr[0]}"],
                 [$class: 'StringParameterValue', name: 'SOURCE_REFSPEC', value: "${sourceArr[1]}"],
@@ -54,11 +55,12 @@ node('python') {
             } else {
                 error("Cannot build ${source}, please check ${deployBuild.absoluteUrl}")
             }
-
+            ${deployBuild.buildNumber}
+*/
             step ([$class: 'CopyArtifact',
           		projectName: 'oscore-ci-build-formula-change',
           		filter: 'build-area/*.deb',
-          		selector: [$class: 'SpecificBuildSelector', buildNumber: '${deployBuild.buildNumber}'],
+          		selector: [$class: 'SpecificBuildSelector', buildNumber: '20'],
           		]);
         }
     }
