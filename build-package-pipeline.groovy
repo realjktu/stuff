@@ -28,12 +28,6 @@ try {
   lintianCheck = true
 }
 
-def uploadAptly
-try {
-  uploadAptly = UPLOAD_APTLY.toBoolean()
-} catch (MissingPropertyException e) {
-  uploadAptly = true
-}
 
 def buildPackage
 try {
@@ -59,11 +53,11 @@ node("docker") {
       sh("rm -rf src || true")
       sh('git init src')
       dir("src") {
-          sh("git fetch --tags --progress ${SOURCE_URL} +refs/heads/*:refs/remotes/origin/*")
+          sh("git fetch --tags ${SOURCE_URL} +refs/heads/*:refs/remotes/origin/*")
           sh("git config remote.origin.url ${SOURCE_URL}")
-          sh("git fetch --tags --progress ${SOURCE_URL} ${SOURCE_REFSPEC}")
+          sh("git fetch --tags ${SOURCE_URL} ${SOURCE_REFSPEC}")
           sh("git checkout FETCH_HEAD")
-          sh("git merge origin/${DEBIAN_BRANCH} -m 'Merge with ${DEBIAN_BRANCH}'")
+          sh("git merge origin/${DEBIAN_BRANCH} -m 'Merge with ${DEBIAN_BRANCH}' || exit 0")
       }
 /*
       dir("src") {
