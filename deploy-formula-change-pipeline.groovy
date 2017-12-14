@@ -66,7 +66,8 @@ node('python') {
       if (aptlyRepo == '')
         aptlyRepo = buidDescr
 
-    stage("Build packages") {
+    stage("Build packages") {    	
+    	sh("rm -rf build-area || true")
         for (source in SOURCES.tokenize('\n')) {
         	sourceArr=source.tokenize(' ')
             deployBuild = build(job: "oscore-ci-build-formula-change", propagate: false, parameters: [                
