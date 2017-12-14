@@ -112,6 +112,29 @@ node('python') {
         }
     }
 
+    if (OPENSTACK_RELEASES) {
+        saltOverrides="linux_system_repo: deb [ arch=amd64 trusted=yes ] ${APTLY_REPO_URL} ${aptlyRepo} main\nlinux_system_repo_priority: 1200\nlinux_system_repo_pin: origin 172.17.49.50"
+        for (OPENSTACK_RELEASE in OPENSTACK_RELEASES.tokenize(',')) {
+            stage("Deploy OpenStack ${OPENSTACK_RELEASE} release with changed formula") {
+                deployBuild = build(job: "oscore-ci-deploy-virtual-aio-${OPENSTACK_RELEASE}", propagate: false, parameters: [
+                //deployBuild = build(job: "oiurchenko_aio_test", propagate: false, parameters: [
+                    [$class: 'StringParameterValue', name: 'STACK_RECLASS_BRANCH', value: "stable/${OPENSTACK_RELEASE}"],
+                    [$class: 'StringParameterValue', name: 'TEST_TEMPEST_PATTERN', value: "set=smoke"],
+                    [$class: 'StringParameterValue', name: 'TEST_TEMPEST_TARGET', value: "cfg01*"],
+                    [$class: 'StringParameterValue', name: 'TEST_TEMPEST_IMAGE', value: "docker-prod-local.artifactory.mirantis.com/mirantis/oscore/rally-tempest"],
+                    [$class: 'TextParameterValue', name: 'SALT_OVERRIDES', value: saltOverrides],
+                    [$class: 'StringParameterValue', name: 'FORMULA_PKG_REVISION', value: 'stable'],
+                ])
+                if (deployBuild.result == 'SUCCESS'){
+                    common.infoMsg("${OPENSTACK_RELEASE} has been deployed successfully")
+                } else {
+                    error("Deployment of ${OPENSTACK_RELEASE}, please check ${deployBuild.absoluteUrl}")            
+                }
+            }
+        }
+    }
+
+
 
 }
 
