@@ -117,7 +117,8 @@ node('python') {
         for (OPENSTACK_RELEASE in OPENSTACK_RELEASES.tokenize(',')) {
             stage("Deploy OpenStack ${OPENSTACK_RELEASE} release with changed formula") {
                 deployBuild = build(job: "oscore-ci-deploy-virtual-aio-${OPENSTACK_RELEASE}", propagate: false, parameters: [
-                //deployBuild = build(job: "oiurchenko_aio_test", propagate: false, parameters: [
+                //deployBuild = build(job: "oiurchenko_aio_test", propagate: false, parameters: [                
+                    [$class: 'StringParameterValue', name: 'STACK_RECLASS_ADDRESS', value: "${STACK_RECLASS_ADDRESS}"],
                     [$class: 'StringParameterValue', name: 'STACK_RECLASS_BRANCH', value: "stable/${OPENSTACK_RELEASE}"],
                     [$class: 'StringParameterValue', name: 'TEST_TEMPEST_PATTERN', value: "set=smoke"],
                     [$class: 'StringParameterValue', name: 'TEST_TEMPEST_TARGET', value: "cfg01*"],
