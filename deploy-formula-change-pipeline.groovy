@@ -54,7 +54,9 @@ def timestamp = common.getDatetime()
 
 
 node('python') {
-
+    def aptlyServer = [
+        'url': APTLY_URL
+    ]
     wrap([$class: 'BuildUser']) {
         if (env.BUILD_USER_ID) {
           buidDescr = "${env.BUILD_USER_ID}-${JOB_NAME}-${BUILD_NUMBER}"
@@ -93,7 +95,7 @@ node('python') {
     	try {
 	        stage("upload to Aptly") {
 	          buildSteps = [:]
-	          restPost(APTLY_URL, '/api/repos', "{\"Name\": \"${aptlyRepo}\"}")
+	          restPost(aptlyServer, '/api/repos', "{\"Name\": \"${aptlyRepo}\"}")
 	          //sh("curl -X POST -H 'Content-Type: application/json' --data '{\"Name\": \"${aptlyRepo}\"}' ${APTLY_URL}/api/repos")
 	          debFiles = sh script: "ls build-area/*.deb", returnStdout: true          
 	          for (file in debFiles.tokenize()) {
@@ -110,7 +112,7 @@ node('python') {
 	        }
 
 	        stage("publish to Aptly") {
-	        	restPost(APTLY_URL, '/api/publish/:.', "{\"SourceKind\": \"local\", \"Sources\": [{\"Name\": \"${aptlyRepo}\"}], \"Architectures\": [\"amd64\"], \"Distribution\": \"${aptlyRepo}\"}")
+	        	restPost(aptlyServer, '/api/publish/:.', "{\"SourceKind\": \"local\", \"Sources\": [{\"Name\": \"${aptlyRepo}\"}], \"Architectures\": [\"amd64\"], \"Distribution\": \"${aptlyRepo}\"}")
 	        	//sh("curl -X POST -H 'Content-Type: application/json' --data '{\"SourceKind\": \"local\", \"Sources\": [{\"Name\": \"${aptlyRepo}\"}], \"Architectures\": [\"amd64\"], \"Distribution\": \"${aptlyRepo}\"}' ${APTLY_URL}/api/publish/:.")
 	        }
 		} catch (Throwable e) {
