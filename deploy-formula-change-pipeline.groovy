@@ -90,26 +90,33 @@ node('python') {
     }
 
     if (uploadAptly && buildPackage) {
-        stage("upload to Aptly") {
-          buildSteps = [:]
-          sh("curl -X POST -H 'Content-Type: application/json' --data '{\"Name\": \"${aptlyRepo}\"}' ${APTLY_URL}/api/repos")
-          debFiles = sh script: "ls build-area/*.deb", returnStdout: true          
-          for (file in debFiles.tokenize()) {
-            workspace = common.getWorkspace()
-            def fh = new File((workspace+"/"+file).trim())
-            buildSteps[fh.name.split('_')[0]] = aptly.uploadPackageStep(
-                  "build-area/"+fh.name,
-                  APTLY_URL,
-                  aptlyRepo,
-                  true
-              )
-          }
-          parallel buildSteps
-        }
+    	try {
+	        stage("upload to Aptly") {
+	          buildSteps = [:]
+	          restPost(APTLY_URL, '/api/repos', "{\"Name\": \"${aptlyRepo}\"}")
+	          //sh("curl -X POST -H 'Content-Type: application/json' --data '{\"Name\": \"${aptlyRepo}\"}' ${APTLY_URL}/api/repos")
+	          debFiles = sh script: "ls build-area/*.deb", returnStdout: true          
+	          for (file in debFiles.tokenize()) {
+	            workspace = common.getWorkspace()
+	            def fh = new File((workspace+"/"+file).trim())
+	            buildSteps[fh.name.split('_')[0]] = aptly.uploadPackageStep(
+	                  "build-area/"+fh.name,
+	                  APTLY_URL,
+	                  aptlyRepo,
+	                  true
+	              )
+	          }
+	          parallel buildSteps
+	        }
 
-        stage("publish to Aptly") {
-          sh("curl -X POST -H 'Content-Type: application/json' --data '{\"SourceKind\": \"local\", \"Sources\": [{\"Name\": \"${aptlyRepo}\"}], \"Architectures\": [\"amd64\"], \"Distribution\": \"${aptlyRepo}\"}' ${APTLY_URL}/api/publish/:.")
-        }
+	        stage("publish to Aptly") {
+	        	restPost(APTLY_URL, '/api/publish/:.', "{\"SourceKind\": \"local\", \"Sources\": [{\"Name\": \"${aptlyRepo}\"}], \"Architectures\": [\"amd64\"], \"Distribution\": \"${aptlyRepo}\"}")
+	        	//sh("curl -X POST -H 'Content-Type: application/json' --data '{\"SourceKind\": \"local\", \"Sources\": [{\"Name\": \"${aptlyRepo}\"}], \"Architectures\": [\"amd64\"], \"Distribution\": \"${aptlyRepo}\"}' ${APTLY_URL}/api/publish/:.")
+	        }
+		} catch (Throwable e) {
+        	currentBuild.result = 'FAILURE'
+        	throw e
+    	} 
     }
 
     if (OPENSTACK_RELEASES) {
@@ -139,3 +146,53 @@ node('python') {
 
 }
 
+
+def restCall(master, uri, method = 'GET', data = null, headers = [:]) {
+    def connection = new URL("${master.url}${uri}").openConnection()
+    if (method != 'GET') {
+        connection.setRequestMethod(method)
+    }
+
+    connection.setRequestProperty('User-Agent', 'jenkins-groovy')
+    connection.setRequestProperty('Accept', 'application/json')
+    if (master.authToken) {
+        // XXX: removeme
+        connection.setRequestProperty('X-Auth-Token', master.authToken)
+    }
+
+    for (header in headers) {
+        connection.setRequestProperty(header.key, header.value)
+    }
+
+    if (data) {
+        connection.setDoOutput(true)
+        connection.setRequestProperty('Content-Type', 'application/json')                    
+        
+        def out = new OutputStreamWriter(connection.outputStream)
+        out.write(data)
+        out.close()
+    }
+
+    if ( connection.responseCode >= 200 && connection.responseCode < 300 ) {
+        res = connection.inputStream.text
+        try {
+            return new groovy.json.JsonSlurperClassic().parseText(res)
+        } catch (Exception e) {
+            return res
+        }
+    } else {
+        throw new Exception(connection.responseCode + ": " + connection.inputStream.text)
+    }
+}
+
+def restPost(master, uri, data = null) {
+    return restCall(master, uri, 'POST', data, ['Accept': '*/*'])
+}
+
+def restGet(master, uri, data = null) {
+    return restCall(master, uri, 'GET', data)
+}
+
+def restDel(master, uri, data = null) {
+    return restCall(master, uri, 'DELETE', data)
+}
