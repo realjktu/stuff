@@ -62,14 +62,14 @@ node("docker") {
       }
       */
       dir("src") {
-        def pollBranches = [[name:'master']]
+        def pollBranches = [[name:'FETCH_HEAD']]
         if (debian_branch) {
           pollBranches.add([name:DEBIAN_BRANCH])
         }
         checkout changelog: true, poll: false,
           scm: [$class: 'GitSCM', branches: pollBranches, doGenerateSubmoduleConfigurations: false,
-          extensions: [[$class: 'CleanCheckout']],  submoduleCfg: [], 
-          userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: SOURCE_REFSPEC]]]
+                extensions: [[$class: 'CleanCheckout']],  submoduleCfg: [], 
+                userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: SOURCE_REFSPEC]]]
 
       }      
 /*
