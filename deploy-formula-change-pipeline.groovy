@@ -2,24 +2,10 @@ def common = new com.mirantis.mk.Common()
 def aptly = new com.mirantis.mk.Aptly()
 def debian = new com.mirantis.mk.Debian()
 
-def snapshot
-try {
-  snapshot = DEBIAN_SNAPSHOT
-} catch (MissingPropertyException e) {
-  snapshot = true
-}
-def debian_branch
-try {
-  debian_branch = DEBIAN_BRANCH
-} catch (MissingPropertyException e) {
-  debian_branch = null
-}
-def revisionPostfix
-try {
-  revisionPostfix = REVISION_POSTFIX
-} catch (MissingPropertyException e) {
-  revisionPostfix = ''
-}
+/**
+* Expected parameters:
+* 
+*/
 
 def lintianCheck
 try {
@@ -96,7 +82,6 @@ node('python') {
 	        stage("upload to Aptly") {
 	          buildSteps = [:]
 	          restPost(aptlyServer, '/api/repos', "{\"Name\": \"${aptlyRepo}\"}")
-	          //sh("curl -X POST -H 'Content-Type: application/json' --data '{\"Name\": \"${aptlyRepo}\"}' ${APTLY_URL}/api/repos")
 	          debFiles = sh script: "ls build-area/*.deb", returnStdout: true          
 	          for (file in debFiles.tokenize()) {
 	            workspace = common.getWorkspace()
@@ -113,7 +98,6 @@ node('python') {
 
 	        stage("publish to Aptly") {
 	        	restPost(aptlyServer, '/api/publish/:.', "{\"SourceKind\": \"local\", \"Sources\": [{\"Name\": \"${aptlyRepo}\"}], \"Architectures\": [\"amd64\"], \"Distribution\": \"${aptlyRepo}\"}")
-	        	//sh("curl -X POST -H 'Content-Type: application/json' --data '{\"SourceKind\": \"local\", \"Sources\": [{\"Name\": \"${aptlyRepo}\"}], \"Architectures\": [\"amd64\"], \"Distribution\": \"${aptlyRepo}\"}' ${APTLY_URL}/api/publish/:.")
 	        }
 		} catch (Throwable e) {
         	currentBuild.result = 'FAILURE'
@@ -191,10 +175,3 @@ def restPost(master, uri, data = null) {
     return restCall(master, uri, 'POST', data, ['Accept': '*/*'])
 }
 
-def restGet(master, uri, data = null) {
-    return restCall(master, uri, 'GET', data)
-}
-
-def restDel(master, uri, data = null) {
-    return restCall(master, uri, 'DELETE', data)
-}

@@ -51,6 +51,7 @@ node("docker") {
       }
       currentBuild.description = buidDescr
       sh("rm -rf src || true")
+      /*
       sh('git init src')
       dir("src") {
           sh("git fetch --tags ${SOURCE_URL} +refs/heads/*:refs/remotes/origin/*")
@@ -59,6 +60,18 @@ node("docker") {
           sh("git checkout FETCH_HEAD")
           sh("git merge origin/${DEBIAN_BRANCH} -m 'Merge with ${DEBIAN_BRANCH}' || exit 0")
       }
+      */
+      dir("src") {
+        def pollBranches = [[name:'master']]
+        if (debian_branch) {
+          pollBranches.add([name:DEBIAN_BRANCH])
+        }
+        checkout changelog: true, poll: false,
+          scm: [$class: 'GitSCM', branches: pollBranches, doGenerateSubmoduleConfigurations: false,
+          extensions: [[$class: 'CleanCheckout']],  submoduleCfg: [], 
+          userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: SOURCE_REFSPEC]]]
+
+      }      
 /*
       dir("src") {
         def pollBranches = [[name:'FETCH_HEAD']]
