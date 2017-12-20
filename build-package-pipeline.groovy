@@ -51,45 +51,17 @@ node("docker") {
       }
       currentBuild.description = buidDescr
       sh("rm -rf src || true")
-      /*
-      sh('git init src')
-      dir("src") {
-          sh("git fetch --tags ${SOURCE_URL} +refs/heads/*:refs/remotes/origin/*")
-          sh("git config remote.origin.url ${SOURCE_URL}")
-          sh("git fetch --tags ${SOURCE_URL} ${SOURCE_REFSPEC}")
-          sh("git checkout FETCH_HEAD")
-          sh("git merge origin/${DEBIAN_BRANCH} -m 'Merge with ${DEBIAN_BRANCH}' || exit 0")
-      }
-      */
       dir("src") {
         def pollBranches = [[name:'FETCH_HEAD']]
-//        if (debian_branch) {
-//          pollBranches.add([name:DEBIAN_BRANCH])
-//        }
         checkout changelog: true, poll: false,
           scm: [$class: 'GitSCM', branches: pollBranches, doGenerateSubmoduleConfigurations: false,
                 extensions: [[$class: 'CleanCheckout']],  submoduleCfg: [], 
                 userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: SOURCE_REFSPEC]]]
         sh("git merge origin/${DEBIAN_BRANCH} -m 'Merge with ${DEBIAN_BRANCH}' || exit 0")
       }      
-/*
-      dir("src") {
-        def pollBranches = [[name:'FETCH_HEAD']]
-        if (debian_branch) {
-          pollBranches.add([name:DEBIAN_BRANCH])
-      }
-        checkout changelog: true, poll: false,
-          scm: [$class: 'GitSCM', branches: pollBranches, doGenerateSubmoduleConfigurations: false,
-          extensions: [[$class: 'CleanCheckout']],  submoduleCfg: [], 
-          userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: SOURCE_REFSPEC]]]
-
-        if (debian_branch){
-          sh("git merge remotes/origin/${DEBIAN_BRANCH} -m 'Merge with ${DEBIAN_BRANCH}'")
-        }
-      }
-*/
       debian.cleanup(OS+":"+DIST)
     }
+
     stage("build-source") {
       //debian.buildSource("src", OS+":"+DIST, snapshot, 'Jenkins', 'autobuild@mirantis.com', revisionPostfix)
       buildSourceGbp("src", OS+":"+DIST, snapshot, 'Jenkins', 'autobuild@mirantis.com', revisionPostfix)
@@ -97,6 +69,7 @@ node("docker") {
       archiveArtifacts artifacts: "build-area/*_source.changes"
       archiveArtifacts artifacts: "build-area/*.tar.*"
     }
+
     stage("build-binary") {
       dsc = sh script: "ls build-area/*.dsc", returnStdout: true
       if(common.validInputParam("PRE_BUILD_SCRIPT")) {
@@ -111,17 +84,17 @@ node("docker") {
       archiveArtifacts artifacts: "build-area/*.deb"
     }
   }
-    if (lintianCheck && buildPackage) {
-      stage("lintian") {
-        changes = sh script: "ls build-area/*_"+ARCH+".changes", returnStdout: true
-        try {
-          debian.runLintian(changes.trim(), OS, OS+":"+DIST)
-        } catch (Exception e) {
-          println "[WARN] Lintian returned non-zero exit status"
-          currentBuild.result = 'UNSTABLE'
-        }
+  if (lintianCheck && buildPackage) {
+    stage("lintian") {
+      changes = sh script: "ls build-area/*_"+ARCH+".changes", returnStdout: true
+      try {
+        debian.runLintian(changes.trim(), OS, OS+":"+DIST)
+      } catch (Exception e) {
+        println "[WARN] Lintian returned non-zero exit status"
+        currentBuild.result = 'UNSTABLE'
       }
     }
+  }
 }
 
 /*
