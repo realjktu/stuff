@@ -70,7 +70,7 @@ node("docker") {
           scm: [$class: 'GitSCM', branches: pollBranches, doGenerateSubmoduleConfigurations: false,
                 extensions: [[$class: 'CleanCheckout']],  submoduleCfg: [], 
                 userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: SOURCE_REFSPEC]]]
-
+        sh("git merge origin/${DEBIAN_BRANCH} -m 'Merge with ${DEBIAN_BRANCH}' || exit 0")
       }      
 /*
       dir("src") {
