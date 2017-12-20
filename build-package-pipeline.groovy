@@ -65,7 +65,7 @@ node("docker") {
         def pollBranches = [[name:'FETCH_HEAD']]
 //        if (debian_branch) {
 //          pollBranches.add([name:DEBIAN_BRANCH])
-        }
+//        }
         checkout changelog: true, poll: false,
           scm: [$class: 'GitSCM', branches: pollBranches, doGenerateSubmoduleConfigurations: false,
                 extensions: [[$class: 'CleanCheckout']],  submoduleCfg: [], 
