@@ -1,18 +1,22 @@
+/**
+* Expected parameters:
+*    UPLOAD_APTLY        
+*    SOURCE_CREDENTIALS  
+*    APTLY_REPO  
+*    BUILD_PACKAGE       
+*    APTLY_API_URL   
+*    APTLY_REPO_URL  
+*    OPENSTACK_RELEASES  
+*    SOURCES 
+*    STACK_RECLASS_ADDRESS
+*
+*/
+
+
 def common = new com.mirantis.mk.Common()
 def aptly = new com.mirantis.mk.Aptly()
 def debian = new com.mirantis.mk.Debian()
 
-/**
-* Expected parameters:
-* 
-*/
-
-def lintianCheck
-try {
-  lintianCheck = LINTIAN_CHECK.toBoolean()
-} catch (MissingPropertyException e) {
-  lintianCheck = true
-}
 
 def buildPackage
 try {
@@ -41,7 +45,7 @@ def timestamp = common.getDatetime()
 
 node('python') {
     def aptlyServer = [
-        'url': APTLY_URL
+        'url': APTLY_API_URL
     ]
     wrap([$class: 'BuildUser']) {
         if (env.BUILD_USER_ID) {
@@ -54,26 +58,28 @@ node('python') {
       if (aptlyRepo == '')
         aptlyRepo = buidDescr
 
-    stage("Build packages") {    	
-    	sh("rm -rf build-area || true")
-        for (source in SOURCES.tokenize('\n')) {
-        	sourceArr=source.tokenize(' ')
-            deployBuild = build(job: "oscore-ci-build-formula-change", propagate: false, parameters: [                
-                [$class: 'StringParameterValue', name: 'SOURCE_URL', value: "${sourceArr[0]}"],
-                [$class: 'StringParameterValue', name: 'SOURCE_REFSPEC', value: "${sourceArr[1]}"],
-            ])
-            if (deployBuild.result == 'SUCCESS'){
-                common.infoMsg("${source} has been build successfully ${deployBuild}")
-            } else {
-                error("Cannot build ${source}, please check ${deployBuild.absoluteUrl}")
-            }
+    if (buildPackage) {
+        stage("Build packages") {    	
+        	sh("rm -rf build-area || true")
+            for (source in SOURCES.tokenize('\n')) {
+            	sourceArr=source.tokenize(' ')
+                deployBuild = build(job: "oscore-ci-build-formula-change", propagate: false, parameters: [                
+                    [$class: 'StringParameterValue', name: 'SOURCE_URL', value: "${sourceArr[0]}"],
+                    [$class: 'StringParameterValue', name: 'SOURCE_REFSPEC', value: "${sourceArr[1]}"],
+                ])
+                if (deployBuild.result == 'SUCCESS'){
+                    common.infoMsg("${source} has been build successfully ${deployBuild}")
+                } else {
+                    error("Cannot build ${source}, please check ${deployBuild.absoluteUrl}")
+                }
 
-            step ([$class: 'CopyArtifact',
-          		projectName: "${deployBuild.getProjectName()}",
-          		filter: 'build-area/*.deb',
-          		selector: [$class: 'SpecificBuildSelector', buildNumber: "${deployBuild.getId()}"],          		
-          		]);
-            archiveArtifacts artifacts: "build-area/*.deb"
+                step ([$class: 'CopyArtifact',
+              		projectName: "${deployBuild.getProjectName()}",
+              		filter: 'build-area/*.deb',
+              		selector: [$class: 'SpecificBuildSelector', buildNumber: "${deployBuild.getId()}"],          		
+              		]);
+                archiveArtifacts artifacts: "build-area/*.deb"
+            }
         }
     }
 
