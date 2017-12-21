@@ -136,13 +136,17 @@ node('python') {
             }
             parallel deploy_release
         }
+        def notToPromote
         stage('Managing deployment results') {
             for (k in testBuilds.keySet()) {
-                //if (testBuilds[k].result != 'SUCCESS') {
-                //    notToPromote = true
-                //}
+                if (testBuilds[k].result != 'SUCCESS') {
+                    notToPromote = true
+                }
                 println(testBuilds[k] + ': ' + testBuilds[k].result)
             }
+        }
+        if (notToPromote) {            
+            currentBuild.result = 'FAILURE'
         }
     }
 // end of node
