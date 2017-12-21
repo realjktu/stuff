@@ -114,6 +114,8 @@ node('python') {
     }
 
     if (OPENSTACK_RELEASES) {
+        def deploy_release = [:]
+        def testBuilds = [:]
         saltOverrides="linux_system_repo: deb [ arch=amd64 trusted=yes ] ${APTLY_REPO_URL} ${aptlyRepo} main\nlinux_system_repo_priority: 1200\nlinux_system_repo_pin: origin 172.17.49.50"
         stage('Deploying environment and testing'){
             for (openstack_release in OPENSTACK_RELEASES.tokenize(',')) {
