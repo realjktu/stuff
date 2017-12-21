@@ -18,6 +18,7 @@
  *   STACK_CLEANUP_JOB          Name of job for deleting stack
  *
  *   STACK_COMPUTE_COUNT        Number of compute nodes to launch
+ *   STATIC_MGMT_NETWORK        Check if model contains static IP address definitions for all nodes
  *
  *   AWS_STACK_REGION           CloudFormation AWS region
  *   AWS_API_CREDENTIALS        AWS Access key ID with  AWS secret access key
@@ -51,16 +52,13 @@
  *
  */
 
-
-@Library('oiurchenko-lib')
-
 common = new com.mirantis.mk.Common()
 git = new com.mirantis.mk.Git()
 openstack = new com.mirantis.mk.Openstack()
 aws = new com.mirantis.mk.Aws()
-orchestrate = new com.mirantis1.mk.Orchestrate()
+orchestrate = new com.mirantis.mk.Orchestrate()
 python = new com.mirantis.mk.Python()
-salt = new com.mirantis1.mk.Salt()
+salt = new com.mirantis.mk.Salt()
 test = new com.mirantis.mk.Test()
 
 _MAX_PERMITTED_STACKS = 2
@@ -169,6 +167,8 @@ node(slave_node) {
                         common.infoMsg("Setting formulas revision to ${FORMULA_PKG_REVISION}")
                         envParams.put('cfg_formula_pkg_revision', FORMULA_PKG_REVISION)
                     }
+
+                    // put extra repo definitions
                     if (common.validInputParam('BOOTSTRAP_EXTRA_REPO_PARAMS')) {
                         common.infoMsg("Setting additional repo during bootstrap to ${BOOTSTRAP_EXTRA_REPO_PARAMS}")
                         envParams.put('cfg_bootstrap_extra_repo_params', BOOTSTRAP_EXTRA_REPO_PARAMS)
@@ -271,10 +271,15 @@ node(slave_node) {
 
         if (common.checkContains('STACK_INSTALL', 'core')) {
             stage('Install core infrastructure') {
-                orchestrate.installFoundationInfra(venvPepper)
+                def staticMgmtNetwork = false
+                if (common.validInputParam('STATIC_MGMT_NETWORK')) {
+                    staticMgmtNetwork = STATIC_MGMT_NETWORK.toBoolean()
+                }
+                orchestrate.installFoundationInfra(venvPepper, staticMgmtNetwork)
+
                 if (common.checkContains('STACK_INSTALL', 'kvm')) {
                     orchestrate.installInfraKvm(venvPepper)
-                    orchestrate.installFoundationInfra(venvPepper)
+                    orchestrate.installFoundationInfra(venvPepper, staticMgmtNetwork)
                 }
 
                 orchestrate.validateFoundationInfra(venvPepper)
@@ -406,8 +411,15 @@ node(slave_node) {
 
         }
 
+        if (common.checkContains('STACK_INSTALL', 'oss')) {
+          stage('Install Oss infra') {
+            orchestrate.installOssInfra(venvPepper)
+          }
+        }
+
         if (common.checkContains('STACK_INSTALL', 'cicd')) {
             stage('Install Cicd') {
+                orchestrate.installInfra(venvPepper)
                 orchestrate.installDockerSwarm(venvPepper)
                 orchestrate.installCicd(venvPepper)
             }
@@ -425,6 +437,17 @@ node(slave_node) {
                 orchestrate.installDockerSwarm(venvPepper)
                 orchestrate.installStacklight(venvPepper)
             }
+        }
+
+        if (common.checkContains('STACK_INSTALL', 'oss')) {
+          stage('Install OSS') {
+            if (!common.checkContains('STACK_INSTALL', 'stacklight')) {
+              // In case if StackLightv2 enabled containers already started
+              orchestrate.installDockerSwarm(venvPepper)
+              salt.enforceState(venvPepper, 'I@docker:swarm:role:master and I@devops_portal:config', 'docker.client', true)
+            }
+            orchestrate.installOss(venvPepper)
+          }
         }
 
         //
@@ -533,4 +556,3 @@ node(slave_node) {
         }
     }
 }
-
