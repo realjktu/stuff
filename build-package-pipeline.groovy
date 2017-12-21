@@ -1,15 +1,17 @@
 /**
+* 
+* Build deb package by Gerrit refspec.
 *
 * Expected parameters:
-*  DEBIAN_BRANCH           
-*  LINTIAN_CHECK   
-*  SOURCE_CREDENTIALS  
-*  SOURCE_URL  
-*  SOURCE_REFSPEC  
-*  OS  
-*  DIST  
-*  EXTRA_REPO_URL  
-*  EXTRA_REPO_KEY_URL  
+*  DEBIAN_BRANCH           Debian branch to be merged.
+*  LINTIAN_CHECK           This boolean sets whether need to perform Lintian check
+*  SOURCE_CREDENTIALS      Credentials to Git access
+*  SOURCE_URL              Git repo URL
+*  SOURCE_REFSPEC          Git refspec
+*  OS                      Operation System name
+*  DIST                    Operation System distributive
+*  EXTRA_REPO_URL          Extra repo URL to be used during package build
+*  EXTRA_REPO_KEY_URL      Extra repo GPG key URL to be used during package build
 *
 **/
 def common = new com.mirantis.mk.Common()
@@ -169,4 +171,3 @@ def buildSourceGbp(dir, image="debian:sid", snapshot=false, gitName='Jenkins', g
         }
     }
 }
-
