@@ -96,7 +96,7 @@ node('python') {
 	            def fh = new File((workspace+"/"+file).trim())
 	            buildSteps[fh.name.split('_')[0]] = aptly.uploadPackageStep(
 	                  "build-area/"+fh.name,
-	                  APTLY_URL,
+	                  APTLY_API_URL,
 	                  aptlyRepo,
 	                  true
 	              )
