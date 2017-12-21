@@ -63,7 +63,6 @@ node("docker") {
     }
 
     stage("build-source") {
-      //debian.buildSource("src", OS+":"+DIST, snapshot, 'Jenkins', 'autobuild@mirantis.com', revisionPostfix)
       buildSourceGbp("src", OS+":"+DIST, snapshot, 'Jenkins', 'autobuild@mirantis.com', revisionPostfix)
       archiveArtifacts artifacts: "build-area/*.dsc"
       archiveArtifacts artifacts: "build-area/*_source.changes"
@@ -84,6 +83,7 @@ node("docker") {
       archiveArtifacts artifacts: "build-area/*.deb"
     }
   }
+
   if (lintianCheck && buildPackage) {
     stage("lintian") {
       changes = sh script: "ls build-area/*_"+ARCH+".changes", returnStdout: true
