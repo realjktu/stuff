@@ -1,5 +1,7 @@
 /**
 *
+* Build one or many packages by Gerrit refspec and deploy to different OpenStack releases.
+*
 * Expected parameters:
 *    UPLOAD_APTLY           This boolean sets whether need to upload to and publish to Aptly packages.
 *    BUILD_PACKAGE          This boolean sets whether need to build packages before deployment.
