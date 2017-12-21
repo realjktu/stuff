@@ -29,18 +29,9 @@ try {
 }
 
 
-def buildPackage
-try {
-  buildPackage = BUILD_PACKAGE.toBoolean()
-} catch (MissingPropertyException e) {
-  buildPackage = true
-}
-
-
 def timestamp = common.getDatetime()
 
 node("docker") {
-  if (buildPackage) {
     stage("checkout") {
       wrap([$class: 'BuildUser']) {
         if (env.BUILD_USER_ID) {
@@ -82,9 +73,8 @@ node("docker") {
       )
       archiveArtifacts artifacts: "build-area/*.deb"
     }
-  }
 
-  if (lintianCheck && buildPackage) {
+  if (lintianCheck) {
     stage("lintian") {
       changes = sh script: "ls build-area/*_"+ARCH+".changes", returnStdout: true
       try {
