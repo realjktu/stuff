@@ -1,3 +1,17 @@
+/**
+*
+* Expected parameters:
+*  DEBIAN_BRANCH           
+*  LINTIAN_CHECK   
+*  SOURCE_CREDENTIALS  
+*  SOURCE_URL  
+*  SOURCE_REFSPEC  
+*  OS  
+*  DIST  
+*  EXTRA_REPO_URL  
+*  EXTRA_REPO_KEY_URL  
+*
+**/
 def common = new com.mirantis.mk.Common()
 def aptly = new com.mirantis.mk.Aptly()
 def debian = new com.mirantis.mk.Debian()
@@ -26,6 +40,13 @@ try {
   lintianCheck = LINTIAN_CHECK.toBoolean()
 } catch (MissingPropertyException e) {
   lintianCheck = true
+}
+
+def arch
+try {
+  arch = ARCH
+} catch (MissingPropertyException e) {
+  arch = 'amd64'
 }
 
 
@@ -76,7 +97,7 @@ node("docker") {
 
   if (lintianCheck) {
     stage("lintian") {
-      changes = sh script: "ls build-area/*_"+ARCH+".changes", returnStdout: true
+      changes = sh script: "ls build-area/*_"+arch+".changes", returnStdout: true
       try {
         debian.runLintian(changes.trim(), OS, OS+":"+DIST)
       } catch (Exception e) {
