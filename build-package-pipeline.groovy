@@ -67,9 +67,10 @@ node('docker') {
       }
       currentBuild.description = buidDescr
       srcDir="${env.WORKSPACE}/src"
-      println(srcDir)
+      if (srcDir.exists()){
+        srcDir.deleteDir()
+      }
       sh('ls -la; pwd')
-      sh('rm -rf src || true')
       dir('src') {
         def pollBranches = [[name: 'FETCH_HEAD']]
         checkout changelog: true, poll: false,
