@@ -118,7 +118,8 @@ node('python') {
     if (OPENSTACK_RELEASES) {
         def deploy_release = [:]
         def testBuilds = [:]
-        saltOverrides="linux_system_repo: deb [ arch=amd64 trusted=yes ] ${APTLY_REPO_URL} ${aptlyRepo} main\nlinux_system_repo_priority: 1200\nlinux_system_repo_pin: origin 172.17.49.50"
+        //saltOverrides="linux_system_repo: deb [ arch=amd64 trusted=yes ] ${APTLY_REPO_URL} ${aptlyRepo} main\nlinux_system_repo_priority: 1200\nlinux_system_repo_pin: origin 172.17.49.50"
+        saltOverrides="linux_system_repo: deb [ arch=amd64 trusted=yes ] ${APTLY_REPO_URL} ${aptlyRepo} main,1200,origin 172.17.49.50"
         stage('Deploying environment and testing'){
             for (openstack_release in OPENSTACK_RELEASES.tokenize(',')) {
                 def release = openstack_release
@@ -130,7 +131,8 @@ node('python') {
                             [$class: 'StringParameterValue', name: 'TEST_TEMPEST_PATTERN', value: "set=smoke"],
                             [$class: 'StringParameterValue', name: 'TEST_TEMPEST_TARGET', value: "cfg01*"],
                             [$class: 'StringParameterValue', name: 'TEST_TEMPEST_IMAGE', value: "docker-prod-local.artifactory.mirantis.com/mirantis/oscore/rally-tempest"],
-                            [$class: 'TextParameterValue', name: 'SALT_OVERRIDES', value: saltOverrides],
+                            //[$class: 'TextParameterValue', name: 'SALT_OVERRIDES', value: saltOverrides],
+                            [$class: 'TextParameterValue', name: 'BOOTSTRAP_EXTRA_REPO_PARAMS', value: saltOverrides],
                             [$class: 'StringParameterValue', name: 'FORMULA_PKG_REVISION', value: 'stable'],
                         ]
                     }
