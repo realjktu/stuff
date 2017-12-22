@@ -66,7 +66,7 @@ node('docker') {
         }
       }
       currentBuild.description = buidDescr
-      srcDir="${env.WORKSPACE}/src"
+      def srcDir = new File("${env.WORKSPACE}/src")
       if (srcDir.exists()){
         srcDir.deleteDir()
       }
