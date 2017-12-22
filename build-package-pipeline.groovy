@@ -56,11 +56,16 @@ def timestamp = common.getDatetime()
 
 node("docker") {
     stage("checkout") {
+      def component = SOURCE_URL.tokenize('/').last()
+      def refspecArr = SOURCE_REFSPEC.tokenize('/')
+      def descrSuffix = component + "-" + refspecArr(list.size()-2) + "-" + refspecArr.last() + "-" + BUILD_NUMBER
+
+
       wrap([$class: 'BuildUser']) {
         if (env.BUILD_USER_ID) {
-          buidDescr = "${env.BUILD_USER_ID}-${JOB_NAME}-${BUILD_NUMBER}"
+          buidDescr = "${env.BUILD_USER_ID}-${descrSuffix}"
         } else {
-          buidDescr = "jenkins-${JOB_NAME}-${BUILD_NUMBER}"
+          buidDescr = "jenkins-${JOB_NAME}-${descrSuffix}"
         }
       }
       currentBuild.description = buidDescr
