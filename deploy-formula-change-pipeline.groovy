@@ -56,7 +56,10 @@ node('python') {
 
     if (buildPackage) {
         stage('Build packages') {
-            sh('rm -rf build-area || true')
+            def srcDir = new File("${env.WORKSPACE}/build-area")
+            if (srcDir.exists()){
+                srcDir.deleteDir()
+            }
             for (source in SOURCES.tokenize('\n')) {
                 sourceArr = source.tokenize(' ')
                 deployBuild = build(job: 'oscore-ci-build-formula-change', propagate: false, parameters: [
