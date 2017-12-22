@@ -56,9 +56,9 @@ def timestamp = common.getDatetime()
 
 node("docker") {
     stage("checkout") {
-      def component = SOURCE_URL.tokenize('/').last()
+      def componentArr = SOURCE_URL.tokenize('/')
       def refspecArr = SOURCE_REFSPEC.tokenize('/')
-      def descrSuffix = component + "-" + refspecArr[refspecArr.size()-2] + "-" + refspecArr.last() + "-" + BUILD_NUMBER
+      def descrSuffix = componentArr[componentArr.size()-2] + '/' + componentArr.last() + '/' + refspecArr[refspecArr.size()-2] + "/" + refspecArr.last() + "-" + BUILD_NUMBER
 
 
       wrap([$class: 'BuildUser']) {
