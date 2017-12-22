@@ -1,5 +1,5 @@
 /**
-* 
+*
 * Build deb package by Gerrit refspec.
 *
 * Expected parameters:
@@ -14,8 +14,8 @@
 *  EXTRA_REPO_KEY_URL      Extra repo GPG key URL to be used during package build
 *
 **/
+
 def common = new com.mirantis.mk.Common()
-def aptly = new com.mirantis.mk.Aptly()
 def debian = new com.mirantis.mk.Debian()
 
 def snapshot
@@ -51,14 +51,11 @@ try {
   arch = 'amd64'
 }
 
-
-def timestamp = common.getDatetime()
-
-node("docker") {
-    stage("checkout") {
+node('docker') {
+    stage('checkout') {
       def componentArr = SOURCE_URL.tokenize('/')
       def refspecArr = SOURCE_REFSPEC.tokenize('/')
-      def descrSuffix = componentArr[componentArr.size()-2] + '/' + componentArr.last() + '/' + refspecArr[refspecArr.size()-2] + "/" + refspecArr.last() + "-" + BUILD_NUMBER
+      def descrSuffix = componentArr[componentArr.size() - 2] + '/' + componentArr.last() + '/' + refspecArr[refspecArr.size() - 2] + '/' + refspecArr.last() + '-' + BUILD_NUMBER
 
 
       wrap([$class: 'BuildUser']) {
@@ -69,46 +66,49 @@ node("docker") {
         }
       }
       currentBuild.description = buidDescr
-      sh("rm -rf src || true")
-      dir("src") {
-        def pollBranches = [[name:'FETCH_HEAD']]
+      srcDir="${env.WORKSPACE}/src"
+      println(srcDir)
+      sh('ls -la; pwd')
+      sh('rm -rf src || true')
+      dir('src') {
+        def pollBranches = [[name: 'FETCH_HEAD']]
         checkout changelog: true, poll: false,
           scm: [$class: 'GitSCM', branches: pollBranches, doGenerateSubmoduleConfigurations: false,
-                extensions: [[$class: 'CleanCheckout']],  submoduleCfg: [], 
+                extensions: [[$class: 'CleanCheckout']],  submoduleCfg: [],
                 userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: SOURCE_REFSPEC]]]
         sh("git merge origin/${DEBIAN_BRANCH} -m 'Merge with ${DEBIAN_BRANCH}' || exit 0")
-      }      
-      debian.cleanup(OS+":"+DIST)
+      }
+      debian.cleanup(OS + ':' + DIST)
     }
 
-    stage("build-source") {
-      buildSourceGbp("src", OS+":"+DIST, snapshot, 'Jenkins', 'autobuild@mirantis.com', revisionPostfix)
-      archiveArtifacts artifacts: "build-area/*.dsc"
-      archiveArtifacts artifacts: "build-area/*_source.changes"
-      archiveArtifacts artifacts: "build-area/*.tar.*"
+    stage('build-source') {
+      buildSourceGbp('src', OS + ':' + DIST, snapshot, 'Jenkins', 'autobuild@mirantis.com', revisionPostfix)
+      archiveArtifacts artifacts: 'build-area/*.dsc'
+      archiveArtifacts artifacts: 'build-area/*_source.changes'
+      archiveArtifacts artifacts: 'build-area/*.tar.*'
     }
 
-    stage("build-binary") {
-      dsc = sh script: "ls build-area/*.dsc", returnStdout: true
-      if(common.validInputParam("PRE_BUILD_SCRIPT")) {
-        writeFile([file:"pre_build_script.sh", text: env['PRE_BUILD_SCRIPT']])
+    stage('build-binary') {
+      def dsc = sh script: 'ls build-area/*.dsc', returnStdout: true
+      if (common.validInputParam('PRE_BUILD_SCRIPT')) {
+        writeFile([file: 'pre_build_script.sh', text: env['PRE_BUILD_SCRIPT']])
       }
       debian.buildBinary(
         dsc.trim(),
-        OS+":"+DIST,
+        OS + ':' + DIST,
         EXTRA_REPO_URL,
         EXTRA_REPO_KEY_URL
       )
-      archiveArtifacts artifacts: "build-area/*.deb"
+      archiveArtifacts artifacts: 'build-area/*.deb'
     }
 
   if (lintianCheck) {
-    stage("lintian") {
-      changes = sh script: "ls build-area/*_"+arch+".changes", returnStdout: true
+    stage('lintian') {
+      def changes = sh script: 'ls build-area/*_' + arch + '.changes', returnStdout: true
       try {
-        debian.runLintian(changes.trim(), OS, OS+":"+DIST)
+        debian.runLintian(changes.trim(), OS, OS + ':' + DIST)
       } catch (Exception e) {
-        println "[WARN] Lintian returned non-zero exit status"
+        println '[WARN] Lintian returned non-zero exit status'
         currentBuild.result = 'UNSTABLE'
       }
     }
@@ -122,25 +122,20 @@ node("docker") {
  * @param image Image name to use for build (default debian:sid)
  * @param snapshot Generate snapshot version (default false)
  */
-def buildSourceGbp(dir, image="debian:sid", snapshot=false, gitName='Jenkins', gitEmail='jenkins@dummy.org', revisionPostfix="") {
+def buildSourceGbp(dir, image='debian:sid', snapshot=false, gitName='Jenkins', gitEmail='jenkins@dummy.org', revisionPostfix='') {
     def common = new com.mirantis.mk.Common()
     def jenkinsUID = common.getJenkinsUid()
     def jenkinsGID = common.getJenkinsGid()
-
-    if (! revisionPostfix) {
-        revisionPostfix = ""
-    }
-
     def workspace = common.getWorkspace()
     def dockerLib = new com.mirantis.mk.Docker()
-    def imageArray = image.split(":")
+    def imageArray = image.split(':')
     def os = imageArray[0]
     def dist = imageArray[1]
     def img = dockerLib.getImage("tcpcloud/debian-build-${os}-${dist}", image)
 
-    img.inside("-u root:root") {
+    img.inside('-u root:root') {
 
-        withEnv(["DEBIAN_FRONTEND=noninteractive", "DEBFULLNAME='${gitName}'", "DEBEMAIL='${gitEmail}'"]) {
+        withEnv(['DEBIAN_FRONTEND=noninteractive', "DEBFULLNAME='${gitName}'", "DEBEMAIL='${gitEmail}'"]) {
             sh("""bash -c 'cd ${workspace} && (which eatmydata || (apt-get update && apt-get install -y eatmydata)) &&
             export LD_LIBRARY_PATH=\${LD_LIBRARY_PATH:+"\$LD_LIBRARY_PATH:"}/usr/lib/libeatmydata &&
             export LD_PRELOAD=\${LD_PRELOAD:+"\$LD_PRELOAD "}libeatmydata.so &&
@@ -163,7 +158,7 @@ def buildSourceGbp(dir, image="debian:sid", snapshot=false, gitName='Jenkins', g
                     NEW_UPSTREAM_VERSION_TAG=`echo \$NEW_UPSTREAM_VERSION | sed 's/.*://'` &&
                     NEW_VERSION=\$NEW_UPSTREAM_VERSION-\$REVISION$revisionPostfix &&
                     echo "Generating new upstream version \$NEW_UPSTREAM_VERSION_TAG" &&
-                    sudo -H -E -u jenkins git tag \$NEW_UPSTREAM_VERSION_TAG HEAD 
+                    sudo -H -E -u jenkins git tag \$NEW_UPSTREAM_VERSION_TAG HEAD
                 else
                     NEW_VERSION=\$VERSION+\$TIMESTAMP.`git rev-parse --short HEAD`$revisionPostfix
                 fi &&

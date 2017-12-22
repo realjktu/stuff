@@ -10,17 +10,14 @@
 *    APTLY_API_URL          Aptly API interface URL
 *    APTLY_REPO_URL         Aptly repo URL
 *    OPENSTACK_RELEASES     List of openstack release to deploy env. Comma as a delimiter.
-*    SOURCES                List of patchsets to be built and delpoy. 
+*    SOURCES                List of patchsets to be built and delpoy.
 *                           Format: <Git URL1> <REFSPEC1>\n<Git URL2> <REFSPEC2>
 *    STACK_RECLASS_ADDRESS  Git URL to reclass model to use for deployment.
 *
 */
 
-
 def common = new com.mirantis.mk.Common()
 def aptly = new com.mirantis.mk.Aptly()
-def debian = new com.mirantis.mk.Debian()
-
 
 def buildPackage
 try {
@@ -43,14 +40,8 @@ try {
   uploadAptly = true
 }
 
-
-def timestamp = common.getDatetime()
-
-
 node('python') {
-    def aptlyServer = [
-        'url': APTLY_API_URL
-    ]
+    def aptlyServer = ['url': APTLY_API_URL]
     wrap([$class: 'BuildUser']) {
         if (env.BUILD_USER_ID) {
           buidDescr = "${env.BUILD_USER_ID}-${JOB_NAME}-${BUILD_NUMBER}"
@@ -59,15 +50,16 @@ node('python') {
         }
     }
     currentBuild.description = buidDescr
-      if (aptlyRepo == '')
+    if (aptlyRepo == ''){
         aptlyRepo = buidDescr
+    }
 
     if (buildPackage) {
-        stage("Build packages") {    	
-        	sh("rm -rf build-area || true")
+        stage('Build packages') {
+            sh('rm -rf build-area || true')
             for (source in SOURCES.tokenize('\n')) {
-            	sourceArr=source.tokenize(' ')
-                deployBuild = build(job: "oscore-ci-build-formula-change", propagate: false, parameters: [                
+                sourceArr = source.tokenize(' ')
+                deployBuild = build(job: 'oscore-ci-build-formula-change', propagate: false, parameters: [
                     [$class: 'StringParameterValue', name: 'SOURCE_URL', value: "${sourceArr[0]}"],
                     [$class: 'StringParameterValue', name: 'SOURCE_REFSPEC', value: "${sourceArr[1]}"],
                 ])
@@ -78,41 +70,41 @@ node('python') {
                 }
 
                 step ([$class: 'CopyArtifact',
-              		projectName: "${deployBuild.getProjectName()}",
-              		filter: 'build-area/*.deb',
-              		selector: [$class: 'SpecificBuildSelector', buildNumber: "${deployBuild.getId()}"],          		
-              		]);
-                archiveArtifacts artifacts: "build-area/*.deb"
+                    projectName: "${deployBuild.getProjectName()}",
+                    filter: 'build-area/*.deb',
+                    selector: [$class: 'SpecificBuildSelector', buildNumber: "${deployBuild.getId()}"],
+                    ])
+                archiveArtifacts artifacts: 'build-area/*.deb'
             }
         }
     }
 
     if (uploadAptly && buildPackage) {
-    	try {
-	        stage("upload to Aptly") {
-	          buildSteps = [:]
-	          restPost(aptlyServer, '/api/repos', "{\"Name\": \"${aptlyRepo}\"}")
-	          debFiles = sh script: "ls build-area/*.deb", returnStdout: true          
-	          for (file in debFiles.tokenize()) {
-	            workspace = common.getWorkspace()
-	            def fh = new File((workspace+"/"+file).trim())
-	            buildSteps[fh.name.split('_')[0]] = aptly.uploadPackageStep(
-	                  "build-area/"+fh.name,
-	                  APTLY_API_URL,
-	                  aptlyRepo,
-	                  true
-	              )
-	          }
-	          parallel buildSteps
-	        }
+        try {
+            stage('upload to Aptly') {
+              buildSteps = [:]
+              restPost(aptlyServer, '/api/repos', "{\"Name\": \"${aptlyRepo}\"}")
+              debFiles = sh script: 'ls build-area/*.deb', returnStdout: true
+              for (file in debFiles.tokenize()) {
+                workspace = common.getWorkspace()
+                def fh = new File((workspace + '/' + file).trim())
+                buildSteps[fh.name.split('_')[0]] = aptly.uploadPackageStep(
+                      'build-area/' + fh.name,
+                      APTLY_API_URL,
+                      aptlyRepo,
+                      true
+                  )
+              }
+              parallel buildSteps
+            }
 
-	        stage("publish to Aptly") {
-	        	restPost(aptlyServer, '/api/publish/:.', "{\"SourceKind\": \"local\", \"Sources\": [{\"Name\": \"${aptlyRepo}\"}], \"Architectures\": [\"amd64\"], \"Distribution\": \"${aptlyRepo}\"}")
-	        }
-		} catch (Throwable e) {
-        	currentBuild.result = 'FAILURE'
-        	throw e
-    	} 
+            stage('publish to Aptly') {
+                restPost(aptlyServer, '/api/publish/:.', "{\"SourceKind\": \"local\", \"Sources\": [{\"Name\": \"${aptlyRepo}\"}], \"Architectures\": [\"amd64\"], \"Distribution\": \"${aptlyRepo}\"}")
+            }
+        } catch (Exception e) {
+            currentBuild.result = 'FAILURE'
+            throw e
+        }
     }
 
     if (OPENSTACK_RELEASES) {
@@ -121,7 +113,7 @@ node('python') {
         URI aptlyUri = new URI(APTLY_REPO_URL)
         def aptlyHost = aptlyUri.getHost()
         //saltOverrides="linux_system_repo: deb [ arch=amd64 trusted=yes ] ${APTLY_REPO_URL} ${aptlyRepo} main\nlinux_system_repo_priority: 1200\nlinux_system_repo_pin: origin 172.17.49.50"
-        saltOverrides="deb [ arch=amd64 trusted=yes ] ${APTLY_REPO_URL} ${aptlyRepo} main,1200,origin ${aptlyHost}"
+        saltOverrides = "deb [ arch=amd64 trusted=yes ] ${APTLY_REPO_URL} ${aptlyRepo} main,1200,origin ${aptlyHost}"
         stage('Deploying environment and testing'){
             for (openstack_release in OPENSTACK_RELEASES.tokenize(',')) {
                 def release = openstack_release
@@ -130,9 +122,9 @@ node('python') {
                         testBuilds["${release}"] = build job: "oscore-ci-deploy-virtual-aio-${release}", propagate: false, parameters: [
                             [$class: 'StringParameterValue', name: 'STACK_RECLASS_ADDRESS', value: "${STACK_RECLASS_ADDRESS}"],
                             [$class: 'StringParameterValue', name: 'STACK_RECLASS_BRANCH', value: "stable/${release}"],
-                            [$class: 'StringParameterValue', name: 'TEST_TEMPEST_PATTERN', value: "set=smoke"],
-                            [$class: 'StringParameterValue', name: 'TEST_TEMPEST_TARGET', value: "cfg01*"],
-                            [$class: 'StringParameterValue', name: 'TEST_TEMPEST_IMAGE', value: "docker-prod-local.artifactory.mirantis.com/mirantis/oscore/rally-tempest"],
+                            [$class: 'StringParameterValue', name: 'TEST_TEMPEST_PATTERN', value: 'set=smoke'],
+                            [$class: 'StringParameterValue', name: 'TEST_TEMPEST_TARGET', value: 'cfg01*'],
+                            [$class: 'StringParameterValue', name: 'TEST_TEMPEST_IMAGE', value: 'docker-prod-local.artifactory.mirantis.com/mirantis/oscore/rally-tempest'],
                             //[$class: 'TextParameterValue', name: 'SALT_OVERRIDES', value: saltOverrides],
                             [$class: 'TextParameterValue', name: 'BOOTSTRAP_EXTRA_REPO_PARAMS', value: saltOverrides],
                             [$class: 'StringParameterValue', name: 'FORMULA_PKG_REVISION', value: 'stable'],
@@ -151,13 +143,12 @@ node('python') {
                 println(k + ': ' + testBuilds[k].result)
             }
         }
-        if (notToPromote) {            
+        if (notToPromote) {
             currentBuild.result = 'FAILURE'
         }
     }
 // end of node
 }
-
 
 def restCall(master, uri, method = 'GET', data = null, headers = [:]) {
     def connection = new URL("${master.url}${uri}").openConnection()
@@ -178,8 +169,8 @@ def restCall(master, uri, method = 'GET', data = null, headers = [:]) {
 
     if (data) {
         connection.setDoOutput(true)
-        connection.setRequestProperty('Content-Type', 'application/json')                    
-        
+        connection.setRequestProperty('Content-Type', 'application/json')
+
         def out = new OutputStreamWriter(connection.outputStream)
         out.write(data)
         out.close()
@@ -193,11 +184,10 @@ def restCall(master, uri, method = 'GET', data = null, headers = [:]) {
             return res
         }
     } else {
-        throw new Exception(connection.responseCode + ": " + connection.inputStream.text)
+        throw (connection.responseCode + ': ' + connection.inputStream.text)
     }
 }
 
 def restPost(master, uri, data = null) {
     return restCall(master, uri, 'POST', data, ['Accept': '*/*'])
 }
-
