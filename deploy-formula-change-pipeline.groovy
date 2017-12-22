@@ -119,7 +119,7 @@ node('python') {
         def deploy_release = [:]
         def testBuilds = [:]
         URI aptlyUri = new URI(APTLY_REPO_URL)
-        def aptlyHost = dbUri.getHost()
+        def aptlyHost = aptlyUri.getHost()
         //saltOverrides="linux_system_repo: deb [ arch=amd64 trusted=yes ] ${APTLY_REPO_URL} ${aptlyRepo} main\nlinux_system_repo_priority: 1200\nlinux_system_repo_pin: origin 172.17.49.50"
         saltOverrides="linux_system_repo: deb [ arch=amd64 trusted=yes ] ${APTLY_REPO_URL} ${aptlyRepo} main,1200,origin ${aptlyHost}"
         stage('Deploying environment and testing'){
