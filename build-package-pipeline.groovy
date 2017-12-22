@@ -58,7 +58,7 @@ node("docker") {
     stage("checkout") {
       def component = SOURCE_URL.tokenize('/').last()
       def refspecArr = SOURCE_REFSPEC.tokenize('/')
-      def descrSuffix = component + "-" + refspecArr(list.size()-2) + "-" + refspecArr.last() + "-" + BUILD_NUMBER
+      def descrSuffix = component + "-" + refspecArr(refspecArr.size()-2) + "-" + refspecArr.last() + "-" + BUILD_NUMBER
 
 
       wrap([$class: 'BuildUser']) {
