@@ -98,8 +98,8 @@ node('docker') {
                 userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: SOURCE_REFSPEC]]
                 ]
         )
-        //sh("git merge origin/${DEBIAN_BRANCH} -m 'Merge with ${DEBIAN_BRANCH}' || exit 0")
-       // sh("git checkout "+DEBIAN_BRANCH)
+        sh("git merge e3619c9 -m 'Merge with saaa' || exit 0")
+        sh("git checkout "+DEBIAN_BRANCH)
       }
       debian.cleanup(OS + ':' + DIST)
     }
