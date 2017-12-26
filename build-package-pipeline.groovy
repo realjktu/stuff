@@ -86,6 +86,7 @@ node('docker') {
           gerritBranch: 'master',
           gerritRefSpec: "refs/changes/90/11490/13",
           gerritScheme: 'https',
+          gerritName: '',
           gerritHost: 'gerrit.mcp.mirantis.net',
           gerritPort: '443',
           gerritProject: 'salt-formulas/keystone'
