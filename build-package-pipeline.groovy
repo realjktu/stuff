@@ -82,10 +82,16 @@ node('docker') {
         //sh("git merge origin/${DEBIAN_BRANCH} -m 'Merge with ${DEBIAN_BRANCH}' || exit 0")
         //gerrit.gerritPatchsetCheckout("https://oiurchenko@gerrit.mcp.mirantis.net:443/a/salt-formulas/keystone", "refs/changes/90/11490/13", 'master', 'test')
         def pollBranches = [[name: 'master']]
+        def scmExtensions = [
+            [$class: 'CleanCheckout'],
+            [$class: 'BuildChooserSetting', buildChooser: [$class: 'GerritTriggerBuildChooser']],
+            [$class: 'CheckoutOption', timeout: timeout],
+            [$class: 'CloneOption', depth: depth, noTags: false, reference: '', shallow: depth > 0, timeout: timeout]
+        ]
         checkout (
           scm: [$class: 'GitSCM', 
                 branches: pollBranches, 
-                extensions: [[$class: 'CleanCheckout']],  
+                extensions: scmExtensions,  
                 userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: SOURCE_REFSPEC]]
                 ]
         )
