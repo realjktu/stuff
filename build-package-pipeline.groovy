@@ -85,8 +85,8 @@ node('docker') {
         def scmExtensions = [
             [$class: 'CleanCheckout'],
             [$class: 'BuildChooserSetting', buildChooser: [$class: 'GerritTriggerBuildChooser']],
-            [$class: 'CheckoutOption', timeout: timeout],
-            [$class: 'CloneOption', depth: depth, noTags: false, reference: '', shallow: depth > 0, timeout: timeout]
+            [$class: 'CheckoutOption', timeout: 20],
+            [$class: 'CloneOption', depth: 0, noTags: false, reference: '', shallow: 0 > 0, timeout: 20]
         ]
         checkout (
           scm: [$class: 'GitSCM', 
