@@ -95,7 +95,7 @@ node('docker') {
                 userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: SOURCE_REFSPEC]]
                 ]
         )
-        sh("git checkout "+DEBIAN_BRANCH)
+       // sh("git checkout "+DEBIAN_BRANCH)
       }
       debian.cleanup(OS + ':' + DIST)
     }
