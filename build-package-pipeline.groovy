@@ -81,16 +81,14 @@ node('docker') {
                 */
         //sh("git merge origin/${DEBIAN_BRANCH} -m 'Merge with ${DEBIAN_BRANCH}' || exit 0")
         //gerrit.gerritPatchsetCheckout("https://oiurchenko@gerrit.mcp.mirantis.net:443/a/salt-formulas/keystone", "refs/changes/90/11490/13", 'master', 'test')
-        gerrit.gerritPatchsetCheckout([
-          //credentialsId : '',
-          gerritBranch: 'master',
-          gerritRefSpec: "refs/changes/90/11490/13",
-          gerritScheme: 'https',
-          gerritName: 'oiurchenko',
-          gerritHost: 'gerrit.mcp.mirantis.net',
-          gerritPort: '443',
-          gerritProject: 'salt-formulas/keystone'
-        ])
+        def pollBranches = [[name: 'master']]
+        checkout 
+          scm: [$class: 'GitSCM', 
+                branches: pollBranches, 
+                extensions: [[$class: 'CleanCheckout']],  
+                userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: SOURCE_REFSPEC]]
+                ]
+
         sh("git checkout "+DEBIAN_BRANCH)
       }
       debian.cleanup(OS + ':' + DIST)
