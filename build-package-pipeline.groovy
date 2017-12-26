@@ -79,7 +79,7 @@ node('docker') {
         sh("git merge origin/${DEBIAN_BRANCH} -m 'Merge with ${DEBIAN_BRANCH}' || exit 0")
         sh("sed -i 's/upstream-branch.*/upstream-branch = HEAD/g' debian/gbp.conf")
         sh("git add -u debian/gbp.conf")
-        sh("git commit -m 'Change upstream-branch to HEAD in gbp.conf")
+        sh("git commit -m 'Change upstream-branch to HEAD in gbp.conf'")
       }
       debian.cleanup(OS + ':' + DIST)
     }
