@@ -77,8 +77,9 @@ node('docker') {
                 extensions: [[$class: 'CleanCheckout']],  submoduleCfg: [],
                 userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: SOURCE_REFSPEC]]]
         sh("git merge origin/${DEBIAN_BRANCH} -m 'Merge with ${DEBIAN_BRANCH}' || exit 0")
-        NEW_UPSTREAM_VERSION_TAG='test_version'
-        sh("git tag ${NEW_UPSTREAM_VERSION_TAG} HEAD")
+        sh("sed -i 's/upstream-branch.*/upstream-branch = HEAD/g' debian/gbp.conf")
+        sh("git add -u debian/gbp.conf")
+        sh("git commit -m 'Change upstream-branch to HEAD in gbp.conf")
       }
       debian.cleanup(OS + ':' + DIST)
     }
