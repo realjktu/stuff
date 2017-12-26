@@ -70,7 +70,6 @@ node('docker') {
       if (srcDir.exists()){
         srcDir.deleteDir()
       }
-      sh('ls -la; pwd')
       dir('src') {
         def pollBranches = [[name: 'FETCH_HEAD']]
         checkout changelog: true, poll: false,

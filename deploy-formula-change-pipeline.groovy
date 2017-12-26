@@ -125,7 +125,8 @@ node('python') {
                         testBuilds["${release}"] = build job: "oscore-ci-deploy-virtual-aio-${release}", propagate: false, parameters: [
                             [$class: 'StringParameterValue', name: 'STACK_RECLASS_ADDRESS', value: "${STACK_RECLASS_ADDRESS}"],
                             [$class: 'StringParameterValue', name: 'STACK_RECLASS_BRANCH', value: "stable/${release}"],
-                            [$class: 'StringParameterValue', name: 'TEST_TEMPEST_PATTERN', value: 'set=smoke'],
+                            //[$class: 'StringParameterValue', name: 'TEST_TEMPEST_PATTERN', value: 'set=smoke'],
+                            [$class: 'StringParameterValue', name: 'TEST_TEMPEST_PATTERN', value: ''],
                             [$class: 'StringParameterValue', name: 'TEST_TEMPEST_TARGET', value: 'cfg01*'],
                             [$class: 'StringParameterValue', name: 'TEST_TEMPEST_IMAGE', value: 'docker-prod-local.artifactory.mirantis.com/mirantis/oscore/rally-tempest'],
                             //[$class: 'TextParameterValue', name: 'SALT_OVERRIDES', value: saltOverrides],
