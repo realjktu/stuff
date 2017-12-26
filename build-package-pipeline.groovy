@@ -77,12 +77,15 @@ node('docker') {
                 extensions: [[$class: 'CleanCheckout']],  submoduleCfg: [],
                 userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: SOURCE_REFSPEC]]]
         sh("git merge origin/${DEBIAN_BRANCH} -m 'Merge with ${DEBIAN_BRANCH}' || exit 0")
+        NEW_UPSTREAM_VERSION_TAG='test_version'
+        sh("git tag ${NEW_UPSTREAM_VERSION_TAG} HEAD")
       }
       debian.cleanup(OS + ':' + DIST)
     }
 
     stage('build-source') {
-      buildSourceGbp('src', OS + ':' + DIST, snapshot, 'Jenkins', 'autobuild@mirantis.com', revisionPostfix)
+      //buildSourceGbp('src', OS + ':' + DIST, snapshot, 'Jenkins', 'autobuild@mirantis.com', revisionPostfix)
+      debian.buildSourceGbp('src', OS + ':' + DIST, false, 'Jenkins', 'autobuild@mirantis.com', revisionPostfix)
       archiveArtifacts artifacts: 'build-area/*.dsc'
       archiveArtifacts artifacts: 'build-area/*_source.changes'
       archiveArtifacts artifacts: 'build-area/*.tar.*'
