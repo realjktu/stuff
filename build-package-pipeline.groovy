@@ -91,12 +91,12 @@ node('docker') {
           gerritPort: '443',
           gerritProject: 'salt-formulas/keystone'
         ])
-
+        sh("git checkout "+DEBIAN_BRANCH)
       }
       debian.cleanup(OS + ':' + DIST)
     }
 
-exxiit
+
     stage('build-source') {
       //buildSourceGbp('src', OS + ':' + DIST, snapshot, 'Jenkins', 'autobuild@mirantis.com', revisionPostfix)
       debian.buildSourceGbp('src', OS + ':' + DIST, true, 'Jenkins', 'autobuild@mirantis.com', revisionPostfix)
