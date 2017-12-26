@@ -90,7 +90,7 @@ node('docker') {
             [$class: 'CheckoutOption', timeout: 20],
             [$class: 'CloneOption', depth: 0, noTags: false, reference: '', shallow: 0 > 0, timeout: 20]
         ]
-        //scmExtensions.add([$class: 'PreBuildMerge', options: [fastForwardMode: 'FF', mergeRemote: 'gerrit', mergeStrategy: 'default', mergeTarget: 'master']])
+        scmExtensions.add([$class: 'PreBuildMerge', options: [fastForwardMode: 'FF', mergeRemote: 'gerrit', mergeStrategy: 'default', mergeTarget: 'master']])
         checkout (
           scm: [$class: 'GitSCM', 
                 branches: pollBranches, 
@@ -98,7 +98,7 @@ node('docker') {
                 userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: SOURCE_REFSPEC]]
                 ]
         )
-        sh("git merge e3619c9 -m 'Merge with saaa' || exit 0")
+        //sh("git merge e3619c9 -m 'Merge with saaa' || exit 0")
         sh("git checkout "+DEBIAN_BRANCH)
       }
       debian.cleanup(OS + ':' + DIST)
