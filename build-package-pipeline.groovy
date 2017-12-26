@@ -17,6 +17,7 @@
 
 def common = new com.mirantis.mk.Common()
 def debian = new com.mirantis.mk.Debian()
+def gerrit = new com.mirantis.mk.Gerrit()
 
 def snapshot
 try {
@@ -79,12 +80,8 @@ node('docker') {
                 userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: SOURCE_REFSPEC]]]
                 */
         //sh("git merge origin/${DEBIAN_BRANCH} -m 'Merge with ${DEBIAN_BRANCH}' || exit 0")
-        def pollBranches = [[name: 'master']]
-        pollBranches.add([name:SOURCE_REFSPEC])
-        checkout changelog: true, poll: false,
-          scm: [$class: 'GitSCM', branches: pollBranches, doGenerateSubmoduleConfigurations: false,
-                extensions: [[$class: 'CleanCheckout']],  submoduleCfg: [],
-                userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL]]]
+        gerrit.gerritPatchsetCheckout("https://oiurchenko@gerrit.mcp.mirantis.net:443/a/salt-formulas/keystone", "refs/changes/90/11490/13", 'master', 'test')
+
       }
       debian.cleanup(OS + ':' + DIST)
     }
