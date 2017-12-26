@@ -71,17 +71,25 @@ node('docker') {
         srcDir.deleteDir()
       }
       dir('src') {
-        def pollBranches = [[name: 'master']]
+        /*
+        def pollBranches = [[name: 'FETCH_HEAD']]
         checkout changelog: true, poll: false,
           scm: [$class: 'GitSCM', branches: pollBranches, doGenerateSubmoduleConfigurations: false,
                 extensions: [[$class: 'CleanCheckout']],  submoduleCfg: [],
                 userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: SOURCE_REFSPEC]]]
+                */
         //sh("git merge origin/${DEBIAN_BRANCH} -m 'Merge with ${DEBIAN_BRANCH}' || exit 0")
-
+        def pollBranches = [[name: 'master']]
+        pollBranches.add([name:SOURCE_REFSPEC])
+        checkout changelog: true, poll: false,
+          scm: [$class: 'GitSCM', branches: pollBranches, doGenerateSubmoduleConfigurations: false,
+                extensions: [[$class: 'CleanCheckout']],  submoduleCfg: [],
+                userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL]]]
       }
       debian.cleanup(OS + ':' + DIST)
     }
 
+exxiit
     stage('build-source') {
       //buildSourceGbp('src', OS + ':' + DIST, snapshot, 'Jenkins', 'autobuild@mirantis.com', revisionPostfix)
       debian.buildSourceGbp('src', OS + ':' + DIST, true, 'Jenkins', 'autobuild@mirantis.com', revisionPostfix)
