@@ -97,7 +97,7 @@ node('docker') {
                 userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: SOURCE_REFSPEC]]
                 ]
         )
-        sh("git checkout "+DEBIAN_BRANCH)
+        //sh("git checkout "+DEBIAN_BRANCH)
       }
       debian.cleanup(OS + ':' + DIST)
     }
@@ -105,7 +105,7 @@ node('docker') {
 
     stage('build-source') {
       //buildSourceGbp('src', OS + ':' + DIST, snapshot, 'Jenkins', 'autobuild@mirantis.com', revisionPostfix)
-      debian.buildSourceGbp('src', OS + ':' + DIST, true, 'Jenkins', 'autobuild@mirantis.com', revisionPostfix)
+      debian.buildSourceGbp('src', OS + ':' + DIST, false, 'Jenkins', 'autobuild@mirantis.com', revisionPostfix)
       archiveArtifacts artifacts: 'build-area/*.dsc'
       archiveArtifacts artifacts: 'build-area/*_source.changes'
       archiveArtifacts artifacts: 'build-area/*.tar.*'
