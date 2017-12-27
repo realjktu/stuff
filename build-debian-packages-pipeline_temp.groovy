@@ -70,7 +70,7 @@ node("docker") {
                           [$class: 'CheckoutOption', timeout: timeout],
                           [$class: 'CloneOption', depth: depth, noTags: false, reference: '', shallow: depth > 0, timeout: timeout],
                           [$class: 'LocalBranch', localBranch: 'master'],
-                          [$class: 'PreBuildMerge', options: [fastForwardMode: 'FF', mergeRemote: 'origin', mergeStrategy: 'default', mergeTarget: SOURCE_BRANCH]]
+                          //[$class: 'PreBuildMerge', options: [fastForwardMode: 'FF', mergeRemote: 'origin', mergeStrategy: 'default', mergeTarget: SOURCE_BRANCH]]
                         ],  
             userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: refspec]]]
 
@@ -85,7 +85,7 @@ node("docker") {
       }      
       debian.cleanup(OS+":"+DIST)
     }
-    
+    exit
     stage("build-source") {
       //debian.buildSource("src", OS+":"+DIST, snapshot, 'Jenkins', 'autobuild@mirantis.com', revisionPostfix)
       buildSourceGbp('src', OS + ':' + DIST, snapshot, 'Jenkins', 'autobuild@mirantis.com', revisionPostfix, '')
