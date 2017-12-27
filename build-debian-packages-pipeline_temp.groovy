@@ -64,7 +64,7 @@ node("docker") {
           def timeout = 20
           def depth = 0
           checkout scm: [$class: 'GitSCM', 
-            branches: pollBranches,
+            branches: [[name:SOURCE_BRANCH]],
             extensions: [ [$class: 'CleanCheckout'],
                           [$class: 'BuildChooserSetting', buildChooser: [$class: 'GerritTriggerBuildChooser']],
                           [$class: 'CheckoutOption', timeout: timeout],
