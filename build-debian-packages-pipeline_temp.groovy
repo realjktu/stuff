@@ -44,7 +44,7 @@ try {
 
 def refspec
 try {
-  refspec = REFSPEC
+  refspec = SOURCE_REFSPEC
 } catch (MissingPropertyException e) {
   refspec = null
 }
@@ -60,14 +60,14 @@ node("docker") {
         if (debian_branch) {
           pollBranches.add([name:DEBIAN_BRANCH])
         }
-        if (refspec) {
+        if (refspec != null) {
           checkout changelog: true, poll: false,
             scm: [$class: 'GitSCM', branches: pollBranches, doGenerateSubmoduleConfigurations: false,
             extensions: [ [$class: 'CleanCheckout'], 
                           [$class: 'LocalBranch', localBranch: 'master'],
                           [$class: 'PreBuildMerge', options: [fastForwardMode: 'FF', mergeRemote: 'gerrit', mergeStrategy: 'default', mergeTarget: 'master']]
                         ],  
-            submoduleCfg: [], userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: SOURCE_REFSPEC]]]
+            submoduleCfg: [], userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: refspec]]]
 
         }else {
           checkout changelog: true, poll: false,
