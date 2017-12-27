@@ -138,6 +138,8 @@ node('cz7918') {
                 }
             }
         }
+        sh("ls -la ")
+        sh("ls -la ..")
 
         if (uploadAptly && buildPackage) {
             try {
