@@ -61,9 +61,14 @@ node("docker") {
           pollBranches.add([name:DEBIAN_BRANCH])
         }
         if (refspec != null) {
+          def timeout = 20
+          def depth = 0
           checkout scm: [$class: 'GitSCM', 
             branches: pollBranches,
-            extensions: [ [$class: 'CleanCheckout'], 
+            extensions: [ [$class: 'CleanCheckout'],
+                          [$class: 'BuildChooserSetting', buildChooser: [$class: 'GerritTriggerBuildChooser']],
+                          [$class: 'CheckoutOption', timeout: timeout],
+                          [$class: 'CloneOption', depth: depth, noTags: false, reference: '', shallow: depth > 0, timeout: timeout]
                           [$class: 'LocalBranch', localBranch: 'master'],
                           [$class: 'PreBuildMerge', options: [fastForwardMode: 'FF', mergeRemote: 'gerrit', mergeStrategy: 'default', mergeTarget: 'master']]
                         ],  
