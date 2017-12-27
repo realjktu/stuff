@@ -134,7 +134,7 @@ node('cz7918') {
                         filter: 'build-area/*.deb',
                         selector: [$class: 'SpecificBuildSelector', buildNumber: "${deployBuild.getId()}"],
                         ])
-                    archiveArtifacts artifacts: '*.deb'
+                    archiveArtifacts artifacts: 'build-area/*.deb'
                 }
             }
         }
