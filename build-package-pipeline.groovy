@@ -98,9 +98,9 @@ node('docker') {
          //       userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL]]
         //        ]
         //)
-        checkout changelog: true, poll: false,
-          scm: [$class: 'GitSCM', branches: pollBranches, doGenerateSubmoduleConfigurations: false,
-          extensions: [[$class: 'CleanCheckout']],  submoduleCfg: [], userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: SOURCE_REFSPEC]]]
+        checkout scm: [$class: 'GitSCM', branches: pollBranches, doGenerateSubmoduleConfigurations: false,
+          extensions: [[$class: 'CleanCheckout']],  submoduleCfg: [], 
+          userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: SOURCE_REFSPEC]]]
         //sh("git merge e3619c9 -m 'Merge with saaa' || exit 0")
         //sh("git checkout "+DEBIAN_BRANCH)
       }
