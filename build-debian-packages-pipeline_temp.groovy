@@ -67,7 +67,7 @@ node("docker") {
                           [$class: 'LocalBranch', localBranch: 'master'],
                           [$class: 'PreBuildMerge', options: [fastForwardMode: 'FF', mergeRemote: 'gerrit', mergeStrategy: 'default', mergeTarget: 'master']]
                         ],  
-            submoduleCfg: [], userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL]]]
+            submoduleCfg: [], userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: SOURCE_REFSPEC]]]
 
         }else {
           checkout changelog: true, poll: false,
