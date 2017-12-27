@@ -1,3 +1,14 @@
+/*
+
+This is a copy of build-debian-pipeline.groovy with the folloiwng changes:
+1. New parameter SOURCE_REFSPEC is added.
+2. New checkout command is defined in case of SOURCE_REFSPEC exists. Lines 71-84
+3. buildSourceGbp procedure is redefined in order to be able specify origin for branches.
+
+This pipeline have to be deleted when related patches will be merged to origin build-debian-pipeline.groovy
+and Debian.groovy lib.
+
+*/
 def common = new com.mirantis.mk.Common()
 def aptly = new com.mirantis.mk.Aptly()
 def debian = new com.mirantis.mk.Debian()
@@ -69,8 +80,8 @@ node("docker") {
                           [$class: 'BuildChooserSetting', buildChooser: [$class: 'GerritTriggerBuildChooser']],
                           [$class: 'CheckoutOption', timeout: timeout],
                           [$class: 'CloneOption', depth: depth, noTags: false, reference: '', shallow: depth > 0, timeout: timeout],
-                          [$class: 'LocalBranch', localBranch: SOURCE_BRANCH],                          
-                        ],  
+                          [$class: 'LocalBranch', localBranch: "${SOURCE_BRANCH}"],
+                        ],
             userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: refspec]]]
 
         }else {
