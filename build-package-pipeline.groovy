@@ -109,9 +109,9 @@ node('docker') {
           gerritBranch: 'master',
           gerritRefSpec: SOURCE_REFSPEC,
           gerritScheme: 'https',
-          gerritName: '',
+          gerritName: 'qqqq',
           gerritHost: 'gerrit.mcp.mirantis.net',
-          gerritPort: '',
+          gerritPort: '443',
           gerritProject: '/a/salt-formulas/keystone'
         ]
         gerrit.gerritPatchsetCheckout(config)
