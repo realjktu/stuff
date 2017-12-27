@@ -131,7 +131,7 @@ node('cz7918') {
 
                     step ([$class: 'CopyArtifact',
                         projectName: "${deployBuild.getProjectName()}",
-                        filter: '*.deb',
+                        filter: 'build-area/*.deb',
                         selector: [$class: 'SpecificBuildSelector', buildNumber: "${deployBuild.getId()}"],
                         ])
                     archiveArtifacts artifacts: '*.deb'
