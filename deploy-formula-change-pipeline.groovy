@@ -16,144 +16,15 @@
 *
 */
 
-def common = new com.mirantis.mk.Common()
-def aptly = new com.mirantis.mk.Aptly()
-
-def buildPackage
-try {
-  buildPackage = BUILD_PACKAGE.toBoolean()
-} catch (MissingPropertyException e) {
-  buildPackage = true
-}
-
-def aptlyRepo
-try {
-  aptlyRepo = APTLY_REPO
-} catch (MissingPropertyException e) {
-  aptlyRepo = null
-}
-
-def uploadAptly
-try {
-  uploadAptly = UPLOAD_APTLY.toBoolean()
-} catch (MissingPropertyException e) {
-  uploadAptly = true
-}
-
-node('python') {
-    def aptlyServer = ['url': APTLY_API_URL]
-    wrap([$class: 'BuildUser']) {
-        if (env.BUILD_USER_ID) {
-          buidDescr = "${env.BUILD_USER_ID}-${JOB_NAME}-${BUILD_NUMBER}"
-        } else {
-          buidDescr = "jenkins-${JOB_NAME}-${BUILD_NUMBER}"
-        }
-    }
-    currentBuild.description = buidDescr
-    if (aptlyRepo == ''){
-        aptlyRepo = buidDescr
-    }
-
-    if (buildPackage) {
-        stage('Build packages') {
-            def srcDir = new File("${env.WORKSPACE}/build-area")
-            if (srcDir.exists()){
-                srcDir.deleteDir()
-            }
-            for (source in SOURCES.tokenize('\n')) {
-                sourceArr = source.tokenize(' ')
-                deployBuild = build(job: 'oscore-ci-build-formula-change', propagate: false, parameters: [
-                    [$class: 'StringParameterValue', name: 'SOURCE_URL', value: "${sourceArr[0]}"],
-                    [$class: 'StringParameterValue', name: 'SOURCE_REFSPEC', value: "${sourceArr[1]}"],
-                ])
-                if (deployBuild.result == 'SUCCESS'){
-                    common.infoMsg("${source} has been build successfully ${deployBuild}")
-                } else {
-                    error("Cannot build ${source}, please check ${deployBuild.absoluteUrl}")
-                }
-
-                step ([$class: 'CopyArtifact',
-                    projectName: "${deployBuild.getProjectName()}",
-                    filter: 'build-area/*.deb',
-                    selector: [$class: 'SpecificBuildSelector', buildNumber: "${deployBuild.getId()}"],
-                    ])
-                archiveArtifacts artifacts: 'build-area/*.deb'
-            }
-        }
-    }
-
-    if (uploadAptly && buildPackage) {
-        try {
-            stage('upload to Aptly') {
-              buildSteps = [:]
-              restPost(aptlyServer, '/api/repos', "{\"Name\": \"${aptlyRepo}\"}")
-              debFiles = sh script: 'ls build-area/*.deb', returnStdout: true
-              for (file in debFiles.tokenize()) {
-                workspace = common.getWorkspace()
-                def fh = new File((workspace + '/' + file).trim())
-                buildSteps[fh.name.split('_')[0]] = aptly.uploadPackageStep(
-                      'build-area/' + fh.name,
-                      APTLY_API_URL,
-                      aptlyRepo,
-                      true
-                  )
-              }
-              parallel buildSteps
-            }
-
-            stage('publish to Aptly') {
-                restPost(aptlyServer, '/api/publish/:.', "{\"SourceKind\": \"local\", \"Sources\": [{\"Name\": \"${aptlyRepo}\"}], \"Architectures\": [\"amd64\"], \"Distribution\": \"${aptlyRepo}\"}")
-            }
-        } catch (Exception e) {
-            currentBuild.result = 'FAILURE'
-            throw e
-        }
-    }
-
-    if (OPENSTACK_RELEASES) {
-        def deploy_release = [:]
-        def testBuilds = [:]
-        URI aptlyUri = new URI(APTLY_REPO_URL)
-        def aptlyHost = aptlyUri.getHost()
-        //saltOverrides="linux_system_repo: deb [ arch=amd64 trusted=yes ] ${APTLY_REPO_URL} ${aptlyRepo} main\nlinux_system_repo_priority: 1200\nlinux_system_repo_pin: origin 172.17.49.50"
-        saltOverrides = "deb [ arch=amd64 trusted=yes ] ${APTLY_REPO_URL} ${aptlyRepo} main,1200,origin ${aptlyHost}"
-        stage('Deploying environment and testing'){
-            for (openstack_release in OPENSTACK_RELEASES.tokenize(',')) {
-                def release = openstack_release
-                deploy_release["OpenStack ${release} deployment"] = {
-                    node('oscore-testing') {
-                        testBuilds["${release}"] = build job: "oscore-ci-deploy-virtual-aio-${release}", propagate: false, parameters: [
-                            [$class: 'StringParameterValue', name: 'STACK_RECLASS_ADDRESS', value: "${STACK_RECLASS_ADDRESS}"],
-                            [$class: 'StringParameterValue', name: 'STACK_RECLASS_BRANCH', value: "stable/${release}"],
-                            //[$class: 'StringParameterValue', name: 'TEST_TEMPEST_PATTERN', value: 'set=smoke'],
-                            [$class: 'StringParameterValue', name: 'TEST_TEMPEST_PATTERN', value: ''],
-                            [$class: 'StringParameterValue', name: 'TEST_TEMPEST_TARGET', value: 'cfg01*'],
-                            [$class: 'StringParameterValue', name: 'TEST_TEMPEST_IMAGE', value: 'docker-prod-local.artifactory.mirantis.com/mirantis/oscore/rally-tempest'],
-                            //[$class: 'TextParameterValue', name: 'SALT_OVERRIDES', value: saltOverrides],
-                            [$class: 'TextParameterValue', name: 'BOOTSTRAP_EXTRA_REPO_PARAMS', value: saltOverrides],
-                            [$class: 'StringParameterValue', name: 'FORMULA_PKG_REVISION', value: 'stable'],
-                        ]
-                    }
-                }
-            }
-            parallel deploy_release
-        }
-        def notToPromote
-        stage('Managing deployment results') {
-            for (k in testBuilds.keySet()) {
-                if (testBuilds[k].result != 'SUCCESS') {
-                    notToPromote = true
-                }
-                println(k + ': ' + testBuilds[k].result)
-            }
-        }
-        if (notToPromote) {
-            currentBuild.result = 'FAILURE'
-        }
-    }
-// end of node
-}
-
+/**
+ * Make generic call using Salt REST API and return parsed JSON
+ *
+ * @param master   Salt connection object
+ * @param uri   URI which will be appended to Salt server base URL
+ * @param method    HTTP method to use (default GET)
+ * @param data      JSON data to POST or PUT
+ * @param headers   Map of additional request headers
+ */
 def restCall(master, uri, method = 'GET', data = null, headers = [:]) {
     def connection = new URL("${master.url}${uri}").openConnection()
     if (method != 'GET') {
@@ -192,6 +63,146 @@ def restCall(master, uri, method = 'GET', data = null, headers = [:]) {
     }
 }
 
+/**
+ * Make POST request using Salt REST API and return parsed JSON
+ *
+ * @param master   Salt connection object
+ * @param uri   URI which will be appended to Docker server base URL
+ * @param data  JSON Data to PUT
+ */
 def restPost(master, uri, data = null) {
     return restCall(master, uri, 'POST', data, ['Accept': '*/*'])
 }
+
+
+def common = new com.mirantis.mk.Common()
+def aptly = new com.mirantis.mk.Aptly()
+
+def buildPackage
+try {
+  buildPackage = BUILD_PACKAGE.toBoolean()
+} catch (MissingPropertyException e) {
+  buildPackage = true
+}
+
+def aptlyRepo
+try {
+  aptlyRepo = APTLY_REPO
+} catch (MissingPropertyException e) {
+  aptlyRepo = null
+}
+
+def uploadAptly
+try {
+  uploadAptly = UPLOAD_APTLY.toBoolean()
+} catch (MissingPropertyException e) {
+  uploadAptly = true
+}
+
+node('cz7918') {
+    def aptlyServer = ['url': APTLY_API_URL]
+    wrap([$class: 'BuildUser']) {
+        if (env.BUILD_USER_ID) {
+          buidDescr = "${env.BUILD_USER_ID}-${JOB_NAME}-${BUILD_NUMBER}"
+        } else {
+          buidDescr = "jenkins-${JOB_NAME}-${BUILD_NUMBER}"
+        }
+    }
+    currentBuild.description = buidDescr
+    if (aptlyRepo == ''){
+        aptlyRepo = buidDescr
+    }
+
+    dir('build-area'){
+        deleteDir()
+        if (buildPackage) {
+            stage('Build packages') {
+                for (source in SOURCES.tokenize('\n')) {
+                    sourceArr = source.tokenize(' ')
+                    deployBuild = build(job: 'oscore-ci-build-formula-change', propagate: false, parameters: [
+                        [$class: 'StringParameterValue', name: 'SOURCE_URL', value: "${sourceArr[0]}"],
+                        [$class: 'StringParameterValue', name: 'SOURCE_REFSPEC', value: "${sourceArr[1]}"],
+                    ])
+                    if (deployBuild.result == 'SUCCESS'){
+                        common.infoMsg("${source} has been build successfully ${deployBuild}")
+                    } else {
+                        error("Cannot build ${source}, please check ${deployBuild.absoluteUrl}")
+                    }
+
+                    step ([$class: 'CopyArtifact',
+                        projectName: "${deployBuild.getProjectName()}",
+                        filter: '*.deb',
+                        selector: [$class: 'SpecificBuildSelector', buildNumber: "${deployBuild.getId()}"],
+                        ])
+                    archiveArtifacts artifacts: '*.deb'
+                }
+            }
+        }
+
+        if (uploadAptly && buildPackage) {
+            try {
+                stage('upload to Aptly') {
+                  def buildSteps = [:]
+                  restPost(aptlyServer, '/api/repos', "{\"Name\": \"${aptlyRepo}\"}")
+                  debFiles = sh script: 'ls *.deb', returnStdout: true
+                  for (file in debFiles.tokenize()) {
+                    workspace = common.getWorkspace()
+                    def fh = new File((workspace + '/' + file).trim())
+                    buildSteps[fh.name.split('_')[0]] = aptly.uploadPackageStep(
+                          fh.name,
+                          APTLY_API_URL,
+                          aptlyRepo,
+                          true
+                      )
+                  }
+                  parallel buildSteps
+                }
+
+                stage('publish to Aptly') {
+                    restPost(aptlyServer, '/api/publish/:.', "{\"SourceKind\": \"local\", \"Sources\": [{\"Name\": \"${aptlyRepo}\"}], \"Architectures\": [\"amd64\"], \"Distribution\": \"${aptlyRepo}\"}")
+                }
+            } catch (Exception e) {
+                currentBuild.result = 'FAILURE'
+                throw e
+            }
+        }
+    }
+
+    if (OPENSTACK_RELEASES) {
+        def deploy_release = [:]
+        def testBuilds = [:]
+        URI aptlyUri = new URI(APTLY_REPO_URL)
+        def aptlyHost = aptlyUri.getHost()
+        def extraRepo = "deb [ arch=amd64 trusted=yes ] ${APTLY_REPO_URL} ${aptlyRepo} main,1200,origin ${aptlyHost}"
+        stage('Deploying environment and testing'){
+            for (openstack_release in OPENSTACK_RELEASES.tokenize(',')) {
+                def release = openstack_release
+                deploy_release["OpenStack ${release} deployment"] = {
+                    node('oscore-testing') {
+                        testBuilds["${release}"] = build job: "oscore-formula-virtual_mcp11_aio-${release}-stable", propagate: false, parameters: [
+                            [$class: 'StringParameterValue', name: 'STACK_RECLASS_ADDRESS', value: "${STACK_RECLASS_ADDRESS}"],
+                            [$class: 'StringParameterValue', name: 'STACK_RECLASS_BRANCH', value: "stable/${release}"],
+                            [$class: 'TextParameterValue', name: 'BOOTSTRAP_EXTRA_REPO_PARAMS', value: extraRepo],                            
+                        ]
+                    }
+                }
+            }
+            parallel deploy_release
+        }
+        def notToPromote
+        stage('Managing deployment results') {
+            for (k in testBuilds.keySet()) {
+                if (testBuilds[k].result != 'SUCCESS') {
+                    notToPromote = true
+                }
+                println(k + ': ' + testBuilds[k].result)
+            }
+        }
+        if (notToPromote) {
+            currentBuild.result = 'FAILURE'
+        }
+    }
+// end of node
+}
+
+
