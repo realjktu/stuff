@@ -115,6 +115,7 @@ node('cz7918') {
 
     dir('build-area'){
         deleteDir()
+    }
         if (buildPackage) {
             stage('Build packages') {
                 for (source in SOURCES.tokenize('\n')) {
@@ -140,7 +141,7 @@ node('cz7918') {
         }
         sh("ls -la ")
         sh("ls -la ..")
-
+    dir('build-area'){
         if (uploadAptly && buildPackage) {
             try {
                 stage('upload to Aptly') {
