@@ -94,7 +94,8 @@ node('docker') {
           scm: [$class: 'GitSCM', 
                 branches: pollBranches, 
                 extensions: scmExtensions,  
-                userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: SOURCE_REFSPEC]]
+                //userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: SOURCE_REFSPEC]]
+                userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL]]
                 ]
         )
         //sh("git merge e3619c9 -m 'Merge with saaa' || exit 0")
