@@ -116,29 +116,29 @@ node('cz7918') {
     dir('build-area'){
         deleteDir()
     }
-        if (buildPackage) {
-            stage('Build packages') {
-                for (source in SOURCES.tokenize('\n')) {
-                    sourceArr = source.tokenize(' ')
-                    deployBuild = build(job: 'oscore-ci-build-formula-change', propagate: false, parameters: [
-                        [$class: 'StringParameterValue', name: 'SOURCE_URL', value: "${sourceArr[0]}"],
-                        [$class: 'StringParameterValue', name: 'SOURCE_REFSPEC', value: "${sourceArr[1]}"],
-                    ])
-                    if (deployBuild.result == 'SUCCESS'){
-                        common.infoMsg("${source} has been build successfully ${deployBuild}")
-                    } else {
-                        error("Cannot build ${source}, please check ${deployBuild.absoluteUrl}")
-                    }
-
-                    step ([$class: 'CopyArtifact',
-                        projectName: "${deployBuild.getProjectName()}",
-                        filter: 'build-area/*.deb',
-                        selector: [$class: 'SpecificBuildSelector', buildNumber: "${deployBuild.getId()}"],
-                        ])
-                    archiveArtifacts artifacts: 'build-area/*.deb'
+    if (buildPackage) {
+        stage('Build packages') {
+            for (source in SOURCES.tokenize('\n')) {
+                sourceArr = source.tokenize(' ')
+                deployBuild = build(job: 'oscore-ci-build-formula-change', propagate: false, parameters: [
+                    [$class: 'StringParameterValue', name: 'SOURCE_URL', value: "${sourceArr[0]}"],
+                    [$class: 'StringParameterValue', name: 'SOURCE_REFSPEC', value: "${sourceArr[1]}"],
+                ])
+                if (deployBuild.result == 'SUCCESS'){
+                    common.infoMsg("${source} has been build successfully ${deployBuild}")
+                } else {
+                    error("Cannot build ${source}, please check ${deployBuild.absoluteUrl}")
                 }
+
+                step ([$class: 'CopyArtifact',
+                    projectName: "${deployBuild.getProjectName()}",
+                    filter: 'build-area/*.deb',
+                    selector: [$class: 'SpecificBuildSelector', buildNumber: "${deployBuild.getId()}"],
+                    ])
+                archiveArtifacts artifacts: 'build-area/*.deb'
             }
         }
+    }
         sh("ls -la ")
         sh("ls -la ..")
     dir('build-area'){
@@ -149,9 +149,9 @@ node('cz7918') {
                   restPost(aptlyServer, '/api/repos', "{\"Name\": \"${aptlyRepo}\"}")
                   def debFiles = sh script: 'ls *.deb', returnStdout: true
                   for (file in debFiles.tokenize()) {
-                    workspace = common.getWorkspace()
+                    //workspace = common.getWorkspace()
                     //def fh = new File((workspace + '/' + file).trim())                    
-                    buildSteps[fh.name.split('_')[0]] = aptly.uploadPackageStep(
+                    buildSteps[file.split('_')[0]] = aptly.uploadPackageStep(
                           file,
                           APTLY_API_URL,
                           aptlyRepo,
