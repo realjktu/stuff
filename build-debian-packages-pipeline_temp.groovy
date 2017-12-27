@@ -80,7 +80,7 @@ node("docker") {
                           [$class: 'BuildChooserSetting', buildChooser: [$class: 'GerritTriggerBuildChooser']],
                           [$class: 'CheckoutOption', timeout: timeout],
                           [$class: 'CloneOption', depth: depth, noTags: false, reference: '', shallow: depth > 0, timeout: timeout],
-                          [$class: 'LocalBranch', localBranch: "${SOURCE_BRANCH}"],
+                          [$class: 'LocalBranch', localBranch: ${SOURCE_BRANCH}],
                         ],
             userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: refspec]]]
 
