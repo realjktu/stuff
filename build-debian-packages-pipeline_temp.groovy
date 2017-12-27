@@ -68,7 +68,7 @@ node("docker") {
             extensions: [ [$class: 'CleanCheckout'],
                           [$class: 'BuildChooserSetting', buildChooser: [$class: 'GerritTriggerBuildChooser']],
                           [$class: 'CheckoutOption', timeout: timeout],
-                          [$class: 'CloneOption', depth: depth, noTags: false, reference: '', shallow: depth > 0, timeout: timeout]
+                          [$class: 'CloneOption', depth: depth, noTags: false, reference: '', shallow: depth > 0, timeout: timeout],
                           [$class: 'LocalBranch', localBranch: 'master'],
                           [$class: 'PreBuildMerge', options: [fastForwardMode: 'FF', mergeRemote: 'gerrit', mergeStrategy: 'default', mergeTarget: 'master']]
                         ],  
