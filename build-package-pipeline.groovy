@@ -81,15 +81,15 @@ node('docker') {
                 */
         //sh("git merge origin/${DEBIAN_BRANCH} -m 'Merge with ${DEBIAN_BRANCH}' || exit 0")
         //gerrit.gerritPatchsetCheckout("https://oiurchenko@gerrit.mcp.mirantis.net:443/a/salt-formulas/keystone", "refs/changes/90/11490/13", 'master', 'test')
-        def pollBranches = [[name: 'master']]
+        //def pollBranches = [[name: 'master']]
         //def pollBranches = [[name: DEBIAN_BRANCH]]
         //pollBranches.add([name:DEBIAN_BRANCH])
-        def scmExtensions = [
-            [$class: 'CleanCheckout'],
+        //def scmExtensions = [
+         //   [$class: 'CleanCheckout'],
             //[$class: 'BuildChooserSetting', buildChooser: [$class: 'GerritTriggerBuildChooser']],
             //[$class: 'CheckoutOption', timeout: 20],
             //[$class: 'CloneOption', depth: 0, noTags: false, reference: '', shallow: 0 > 0, timeout: 20]
-        ]        
+        //]        
         //checkout (
         //  scm: [$class: 'GitSCM', 
         //        branches: pollBranches, 
@@ -98,12 +98,26 @@ node('docker') {
          //       userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL]]
         //        ]
         //)
-        checkout scm: [$class: 'GitSCM', 
-          branches: pollBranches,
-          extensions: [[$class: 'CleanCheckout']],
-          userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: SOURCE_REFSPEC]]]
+        //checkout scm: [$class: 'GitSCM', 
+        //  branches: pollBranches,
+        //  extensions: [[$class: 'CleanCheckout']],
+        //  userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: SOURCE_REFSPEC]]]
         //sh("git merge e3619c9 -m 'Merge with saaa' || exit 0")
         //sh("git checkout "+DEBIAN_BRANCH)
+        def config = [
+          //credentialsId : SOURCE_CREDENTIALS,
+          gerritBranch: 'master',
+          gerritRefSpec: SOURCE_REFSPEC,
+          gerritScheme: 'https',
+          gerritName: '',
+          gerritHost: 'gerrit.mcp.mirantis.net',
+          gerritPort: '',
+          gerritProject: '/a/salt-formulas/keystone'
+        ]
+        gerrit.gerritPatchsetCheckout(config)
+
+        exit 0
+
       }
       debian.cleanup(OS + ':' + DIST)
     }
