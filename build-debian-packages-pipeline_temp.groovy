@@ -83,8 +83,7 @@ node("docker") {
         }
       }      
       debian.cleanup(OS+":"+DIST)
-    }
-    exit
+    }    
     stage("build-source") {
       //debian.buildSource("src", OS+":"+DIST, snapshot, 'Jenkins', 'autobuild@mirantis.com', revisionPostfix)
       buildSourceGbp('src', OS + ':' + DIST, snapshot, 'Jenkins', 'autobuild@mirantis.com', revisionPostfix, '')
