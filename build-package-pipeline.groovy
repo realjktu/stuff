@@ -106,6 +106,8 @@ node('docker') {
         //sh("git checkout "+DEBIAN_BRANCH)
         def config = [
           //credentialsId : SOURCE_CREDENTIALS,
+          withLocalBranch: true,
+          withMerge: true,
           gerritBranch: 'master',
           gerritRefSpec: SOURCE_REFSPEC,
           gerritScheme: 'https',
