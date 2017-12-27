@@ -112,7 +112,7 @@ node('docker') {
           gerritName: 'qqqq',
           gerritHost: 'gerrit.mcp.mirantis.net',
           gerritPort: '443',
-          gerritProject: '/a/salt-formulas/keystone'
+          gerritProject: 'a/salt-formulas/keystone'
         ]
         gerrit.gerritPatchsetCheckout(config)
 
