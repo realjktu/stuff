@@ -61,13 +61,13 @@ node("docker") {
           pollBranches.add([name:DEBIAN_BRANCH])
         }
         if (refspec != null) {
-          checkout changelog: true, poll: false,
-            scm: [$class: 'GitSCM', branches: pollBranches, doGenerateSubmoduleConfigurations: false,
+          checkout scm: [$class: 'GitSCM', 
+            branches: pollBranches,
             extensions: [ [$class: 'CleanCheckout'], 
                           [$class: 'LocalBranch', localBranch: 'master'],
                           [$class: 'PreBuildMerge', options: [fastForwardMode: 'FF', mergeRemote: 'gerrit', mergeStrategy: 'default', mergeTarget: 'master']]
                         ],  
-            submoduleCfg: [], userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: refspec]]]
+            userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: refspec]]]
 
         }else {
           checkout changelog: true, poll: false,
