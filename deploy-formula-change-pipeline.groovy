@@ -144,12 +144,12 @@ node('cz7918') {
                 stage('upload to Aptly') {
                   def buildSteps = [:]
                   restPost(aptlyServer, '/api/repos', "{\"Name\": \"${aptlyRepo}\"}")
-                  debFiles = sh script: 'ls *.deb', returnStdout: true
+                  def debFiles = sh script: 'ls *.deb', returnStdout: true
                   for (file in debFiles.tokenize()) {
                     workspace = common.getWorkspace()
-                    def fh = new File((workspace + '/' + file).trim())
+                    //def fh = new File((workspace + '/' + file).trim())                    
                     buildSteps[fh.name.split('_')[0]] = aptly.uploadPackageStep(
-                          fh.name,
+                          file,
                           APTLY_API_URL,
                           aptlyRepo,
                           true
