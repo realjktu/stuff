@@ -86,18 +86,21 @@ node('docker') {
         //pollBranches.add([name:DEBIAN_BRANCH])
         def scmExtensions = [
             [$class: 'CleanCheckout'],
-            [$class: 'BuildChooserSetting', buildChooser: [$class: 'GerritTriggerBuildChooser']],
-            [$class: 'CheckoutOption', timeout: 20],
-            [$class: 'CloneOption', depth: 0, noTags: false, reference: '', shallow: 0 > 0, timeout: 20]
+            //[$class: 'BuildChooserSetting', buildChooser: [$class: 'GerritTriggerBuildChooser']],
+            //[$class: 'CheckoutOption', timeout: 20],
+            //[$class: 'CloneOption', depth: 0, noTags: false, reference: '', shallow: 0 > 0, timeout: 20]
         ]        
-        checkout (
-          scm: [$class: 'GitSCM', 
-                branches: pollBranches, 
-                extensions: scmExtensions,  
+        //checkout (
+        //  scm: [$class: 'GitSCM', 
+        //        branches: pollBranches, 
+        //        extensions: scmExtensions,  
                 //userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: SOURCE_REFSPEC]]
-                userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL]]
-                ]
-        )
+         //       userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL]]
+        //        ]
+        //)
+        checkout changelog: true, poll: false,
+          scm: [$class: 'GitSCM', branches: pollBranches, doGenerateSubmoduleConfigurations: false,
+          extensions: [[$class: 'CleanCheckout']],  submoduleCfg: [], userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL]]]
         //sh("git merge e3619c9 -m 'Merge with saaa' || exit 0")
         //sh("git checkout "+DEBIAN_BRANCH)
       }
