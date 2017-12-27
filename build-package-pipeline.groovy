@@ -194,7 +194,7 @@ def buildSourceGbpNew(dir, image="debian:sid", snapshot=false, gitName='Jenkins'
                 TIMESTAMP=`date +%Y%m%d%H%M` &&
                 if [[ "`cat debian/source/format`" = *quilt* ]]; then
                     UPSTREAM_BRANCH=`(grep upstream-branch debian/gbp.conf || echo master) | cut -d = -f 2 | tr -d " "` &&
-                    UPSTREAM_REV=`git rev-parse --short origin/\$UPSTREAM_BRANCH` &&
+                    UPSTREAM_REV=`git rev-parse --short \$UPSTREAM_BRANCH` &&
                     NEW_UPSTREAM_VERSION="\$UPSTREAM_VERSION+\$TIMESTAMP.\$UPSTREAM_REV" &&
                     NEW_UPSTREAM_VERSION_TAG=`echo \$NEW_UPSTREAM_VERSION | sed 's/.*://'` &&
                     NEW_VERSION=\$NEW_UPSTREAM_VERSION-\$REVISION$revisionPostfix &&
