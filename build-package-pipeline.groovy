@@ -98,7 +98,7 @@ node('docker') {
                 ]
         )
         //sh("git merge e3619c9 -m 'Merge with saaa' || exit 0")
-        sh("git checkout "+DEBIAN_BRANCH)
+        //sh("git checkout "+DEBIAN_BRANCH)
       }
       debian.cleanup(OS + ':' + DIST)
     }
