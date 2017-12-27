@@ -89,8 +89,7 @@ node('docker') {
             [$class: 'BuildChooserSetting', buildChooser: [$class: 'GerritTriggerBuildChooser']],
             [$class: 'CheckoutOption', timeout: 20],
             [$class: 'CloneOption', depth: 0, noTags: false, reference: '', shallow: 0 > 0, timeout: 20]
-        ]
-        scmExtensions.add([$class: 'PreBuildMerge', options: [fastForwardMode: 'FF', mergeRemote: 'origin', mergeStrategy: 'default', mergeTarget: 'master']])
+        ]        
         checkout (
           scm: [$class: 'GitSCM', 
                 branches: pollBranches, 
