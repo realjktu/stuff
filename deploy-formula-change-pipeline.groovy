@@ -139,8 +139,7 @@ node('cz7918') {
             }
         }
     }
-        sh("ls -la ")
-        sh("ls -la ..")
+
     dir('build-area'){
         if (uploadAptly && buildPackage) {
             try {
@@ -148,9 +147,7 @@ node('cz7918') {
                   def buildSteps = [:]
                   restPost(aptlyServer, '/api/repos', "{\"Name\": \"${aptlyRepo}\"}")
                   def debFiles = sh script: 'ls *.deb', returnStdout: true
-                  for (file in debFiles.tokenize()) {
-                    //workspace = common.getWorkspace()
-                    //def fh = new File((workspace + '/' + file).trim())                    
+                  for (file in debFiles.tokenize()) {                  
                     buildSteps[file.split('_')[0]] = aptly.uploadPackageStep(
                           file,
                           APTLY_API_URL,
