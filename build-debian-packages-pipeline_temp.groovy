@@ -87,7 +87,7 @@ node('docker') {
           checkout scm: [$class: 'GitSCM',
             branches: [[name: SOURCE_BRANCH]],
             extensions: [ [$class: 'CleanCheckout'],
-                  //        [$class: 'BuildChooserSetting', buildChooser: [$class: 'GerritTriggerBuildChooser']],                          
+                          [$class: 'BuildChooserSetting', buildChooser: [$class: 'GerritTriggerBuildChooser']],                          
                           [$class: 'CloneOption', noTags: false, reference: ''],
                           [$class: 'LocalBranch', localBranch: SOURCE_BRANCH],
                         ],
