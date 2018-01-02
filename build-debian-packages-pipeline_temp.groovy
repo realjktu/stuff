@@ -71,29 +71,16 @@ node('docker') {
         if (debian_branch) {
           pollBranches.add([name: DEBIAN_BRANCH])
         }
+        def extensions = [[$class: 'CleanCheckout']]
+        def userRemoteConfigs = [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL]]
         if (refspec != null) {
-//          def timeout = 20
-//          def depth = 0
-/*          checkout scm: [$class: 'GitSCM',
-            branches: [[name: SOURCE_BRANCH]],
-            extensions: [ [$class: 'CleanCheckout'],
-                          [$class: 'BuildChooserSetting', buildChooser: [$class: 'GerritTriggerBuildChooser']],
-                          [$class: 'CheckoutOption', timeout: timeout],
-                          [$class: 'CloneOption', depth: depth, noTags: false, reference: '', shallow: depth > 0, timeout: timeout],
-                          [$class: 'LocalBranch', localBranch: SOURCE_BRANCH],
-                        ],
-            userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: refspec]]]
-            */
-
-            checkout changelog: true, poll: false,
-            scm: [$class: 'GitSCM', branches: pollBranches, doGenerateSubmoduleConfigurations: false,
-            extensions: [[$class: 'CleanCheckout'], [$class: 'BuildChooserSetting', buildChooser: [$class: 'GerritTriggerBuildChooser']], [$class: 'LocalBranch', localBranch: SOURCE_BRANCH] ],  submoduleCfg: [], userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: refspec]]]
-  
-        }else {
-          checkout changelog: true, poll: false,
-            scm: [$class: 'GitSCM', branches: pollBranches, doGenerateSubmoduleConfigurations: false,
-            extensions: [[$class: 'CleanCheckout']],  submoduleCfg: [], userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL]]]
+          extensions.add([$class: 'BuildChooserSetting', buildChooser: [$class: 'GerritTriggerBuildChooser']])
+          extensions.add([$class: 'LocalBranch', localBranch: SOURCE_BRANCH])
+          userRemoteConfigs.add(refspec: refspec)
         }
+        checkout changelog: true, poll: false,
+          scm: [$class: 'GitSCM', branches: pollBranches, doGenerateSubmoduleConfigurations: false,
+          extensions: extensions,  submoduleCfg: [], userRemoteConfigs: userRemoteConfigs]
         if (debian_branch){
           sh('git checkout ' + DEBIAN_BRANCH)
         }
