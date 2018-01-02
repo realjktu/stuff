@@ -89,14 +89,6 @@ node('docker') {
             scm: [$class: 'GitSCM', branches: pollBranches, doGenerateSubmoduleConfigurations: false,
             extensions: [[$class: 'CleanCheckout'], [$class: 'BuildChooserSetting', buildChooser: [$class: 'GerritTriggerBuildChooser']] ],  submoduleCfg: [], userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: refspec]]]
   
-          checkout scm: [$class: 'GitSCM',
-            branches: [[name: SOURCE_BRANCH]],
-            extensions: [ [$class: 'CleanCheckout'],
-                          [$class: 'BuildChooserSetting', buildChooser: [$class: 'DefaultBuildChooser']],
-                  //        [$class: 'CloneOption', noTags: false, reference: ''],
-                          [$class: 'LocalBranch', localBranch: SOURCE_BRANCH],
-                        ],
-            userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: refspec]]]
         }else {
           checkout changelog: true, poll: false,
             scm: [$class: 'GitSCM', branches: pollBranches, doGenerateSubmoduleConfigurations: false,
