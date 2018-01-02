@@ -68,16 +68,15 @@ node('docker') {
       sh('rm -rf src || true')
       dir('src') {
         def pollBranches = [[name: SOURCE_BRANCH]]
-        if (debian_branch && refspec==null) {
+        if (debian_branch) {
           pollBranches.add([name: DEBIAN_BRANCH])
         }
         def extensions = [[$class: 'CleanCheckout']]
         def userRemoteConfigs = [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL]]
         if (refspec) {
-          println('Add refspec')
           extensions.add([$class: 'BuildChooserSetting', buildChooser: [$class: 'GerritTriggerBuildChooser']])
           extensions.add([$class: 'LocalBranch', localBranch: SOURCE_BRANCH])
-          userRemoteConfigs.add([refspec: refspec])
+          userRemoteConfigs[0].['refspec'] = refspec
         }
         checkout changelog: true, poll: false,
           scm: [$class: 'GitSCM', branches: pollBranches, doGenerateSubmoduleConfigurations: false,
