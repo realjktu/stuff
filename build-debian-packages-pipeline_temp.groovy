@@ -62,20 +62,20 @@ try {
 
 
 def timestamp = common.getDatetime()
-node("docker") {
+node('docker') {
   try{
-    stage("checkout") {
-      sh("rm -rf src || true")
-      dir("src") {
-        def pollBranches = [[name:SOURCE_BRANCH]]
+    stage('checkout') {
+      sh('rm -rf src || true')
+      dir('src') {
+        def pollBranches = [[name: SOURCE_BRANCH]]
         if (debian_branch) {
-          pollBranches.add([name:DEBIAN_BRANCH])
+          pollBranches.add([name: DEBIAN_BRANCH])
         }
         if (refspec != null) {
-          def timeout = 20
-          def depth = 0
-          checkout scm: [$class: 'GitSCM', 
-            branches: [[name:SOURCE_BRANCH]],
+//          def timeout = 20
+//          def depth = 0
+/*          checkout scm: [$class: 'GitSCM',
+            branches: [[name: SOURCE_BRANCH]],
             extensions: [ [$class: 'CleanCheckout'],
                           [$class: 'BuildChooserSetting', buildChooser: [$class: 'GerritTriggerBuildChooser']],
                           [$class: 'CheckoutOption', timeout: timeout],
@@ -83,28 +83,36 @@ node("docker") {
                           [$class: 'LocalBranch', localBranch: SOURCE_BRANCH],
                         ],
             userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: refspec]]]
-
+            */
+          checkout scm: [$class: 'GitSCM',
+            branches: [[name: SOURCE_BRANCH]],
+            extensions: [ [$class: 'CleanCheckout'],
+                          [$class: 'BuildChooserSetting', buildChooser: [$class: 'GerritTriggerBuildChooser']],                          
+                          [$class: 'CloneOption', noTags: false, reference: ''],
+                          [$class: 'LocalBranch', localBranch: SOURCE_BRANCH],
+                        ],
+            userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: refspec]]]
         }else {
           checkout changelog: true, poll: false,
             scm: [$class: 'GitSCM', branches: pollBranches, doGenerateSubmoduleConfigurations: false,
             extensions: [[$class: 'CleanCheckout']],  submoduleCfg: [], userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL]]]
         }
         if (debian_branch){
-          sh("git checkout "+DEBIAN_BRANCH)
+          sh('git checkout ' + DEBIAN_BRANCH)
         }
       }      
-      debian.cleanup(OS+":"+DIST)
+      debian.cleanup(OS + ':' + DIST)
     }    
-    stage("build-source") {
+    stage('build-source') {
       //debian.buildSource("src", OS+":"+DIST, snapshot, 'Jenkins', 'autobuild@mirantis.com', revisionPostfix)
       buildSourceGbp('src', OS + ':' + DIST, snapshot, 'Jenkins', 'autobuild@mirantis.com', revisionPostfix, '')
-      archiveArtifacts artifacts: "build-area/*.dsc"
-      archiveArtifacts artifacts: "build-area/*_source.changes"
-      archiveArtifacts artifacts: "build-area/*.tar.*"
+      archiveArtifacts artifacts: 'build-area/*.dsc'
+      archiveArtifacts artifacts: 'build-area/*_source.changes'
+      archiveArtifacts artifacts: 'build-area/*.tar.*'
     }
-    stage("build-binary") {
-      dsc = sh script: "ls build-area/*.dsc", returnStdout: true
-      if(common.validInputParam("PRE_BUILD_SCRIPT")) {
+    stage('build-binary') {
+      dsc = sh script: 'ls build-area/*.dsc', returnStdout: true
+      if(common.validInputParam('PRE_BUILD_SCRIPT')) {
         writeFile([file:"pre_build_script.sh", text: env['PRE_BUILD_SCRIPT']])
       }
       debian.buildBinary(
