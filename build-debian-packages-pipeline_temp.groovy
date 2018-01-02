@@ -73,7 +73,7 @@ node('docker') {
         }
         def extensions = [[$class: 'CleanCheckout']]
         def userRemoteConfigs = [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL]]
-        if (refspec) {
+        if (common.validInputParam('SOURCE_REFSPEC')) {
           extensions.add([$class: 'BuildChooserSetting', buildChooser: [$class: 'GerritTriggerBuildChooser']])
           extensions.add([$class: 'LocalBranch', localBranch: SOURCE_BRANCH])
           userRemoteConfigs[0]['refspec'] = refspec
