@@ -76,7 +76,7 @@ node('docker') {
         if (refspec) {
           extensions.add([$class: 'BuildChooserSetting', buildChooser: [$class: 'GerritTriggerBuildChooser']])
           extensions.add([$class: 'LocalBranch', localBranch: SOURCE_BRANCH])
-          userRemoteConfigs[0].['refspec'] = refspec
+          userRemoteConfigs[0]['refspec'] = refspec
         }
         checkout changelog: true, poll: false,
           scm: [$class: 'GitSCM', branches: pollBranches, doGenerateSubmoduleConfigurations: false,
