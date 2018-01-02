@@ -88,7 +88,7 @@ node('docker') {
             branches: [[name: SOURCE_BRANCH]],
             extensions: [ [$class: 'CleanCheckout'],
                   //        [$class: 'BuildChooserSetting', buildChooser: [$class: 'GerritTriggerBuildChooser']],                          
-                  //        [$class: 'CloneOption', noTags: false, reference: ''],
+                          [$class: 'CloneOption', noTags: false, reference: ''],
                           [$class: 'LocalBranch', localBranch: SOURCE_BRANCH],
                         ],
             userRemoteConfigs: [[credentialsId: SOURCE_CREDENTIALS, url: SOURCE_URL, refspec: refspec]]]
