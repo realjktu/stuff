@@ -53,14 +53,6 @@ try {
   uploadAptly = true
 }
 
-def refspec
-try {
-  refspec = SOURCE_REFSPEC
-} catch (MissingPropertyException e) {
-  refspec = null
-}
-
-
 def timestamp = common.getDatetime()
 node('docker') {
   try{
@@ -76,7 +68,7 @@ node('docker') {
         if (common.validInputParam('SOURCE_REFSPEC')) {
           extensions.add([$class: 'BuildChooserSetting', buildChooser: [$class: 'GerritTriggerBuildChooser']])
           extensions.add([$class: 'LocalBranch', localBranch: SOURCE_BRANCH])
-          userRemoteConfigs[0]['refspec'] = refspec
+          userRemoteConfigs[0]['refspec'] = SOURCE_REFSPEC
         }
         checkout changelog: true, poll: false,
           scm: [$class: 'GitSCM', branches: pollBranches, doGenerateSubmoduleConfigurations: false,
