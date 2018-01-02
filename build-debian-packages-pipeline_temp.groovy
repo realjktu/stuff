@@ -68,7 +68,7 @@ node('docker') {
       sh('rm -rf src || true')
       dir('src') {
         def pollBranches = [[name: SOURCE_BRANCH]]
-        if (debian_branch) {
+        if (debian_branch && refspec==null) {
           pollBranches.add([name: DEBIAN_BRANCH])
         }
         def extensions = [[$class: 'CleanCheckout']]
