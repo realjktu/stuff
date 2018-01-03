@@ -13,6 +13,7 @@
 *    SOURCES                List of patchsets to be built and delpoy.
 *                           Format: <Git URL1> <REFSPEC1>\n<Git URL2> <REFSPEC2>
 *    STACK_RECLASS_ADDRESS  Git URL to reclass model to use for deployment.
+*    PKG_BUILD_JOB_NAME     Jenkins job name to build pakages. Default: oscore-ci-build-formula-change
 *
 */
 
@@ -99,7 +100,30 @@ try {
   uploadAptly = true
 }
 
-node('cz7918') {
+def pkgBuildJobName
+try {
+  pkgBuildJobName = PKG_BUILD_JOB_NAME
+} catch (MissingPropertyException e) {
+  pkgBuildJobName = 'oscore-ci-build-formula-change'
+}
+
+def stackDelete
+try {
+  stackDelete = STACK_DELETE.toBoolean()
+} catch (MissingPropertyException e) {
+  stackDelete = true
+}
+
+def sources
+if (common.validInputParam('SOURCES')) {
+    sources = SOURCES
+} else {
+    if (common.validInputParam('GERRIT_REFSPEC')) {        
+        sources = "https://${GERRIT_HOST}/${GERRIT_PROJECT} ${GERRIT_REFSPEC}"
+    }
+}
+
+node('python') {
     def aptlyServer = ['url': APTLY_API_URL]
     wrap([$class: 'BuildUser']) {
         if (env.BUILD_USER_ID) {
@@ -117,10 +141,10 @@ node('cz7918') {
         deleteDir()
     }
     if (buildPackage) {
-        stage('Build packages') {
-            for (source in SOURCES.tokenize('\n')) {
+        stage('Build packages') {            
+            for (source in sources.tokenize('\n')) {
                 sourceArr = source.tokenize(' ')
-                deployBuild = build(job: 'oscore-ci-build-formula-change', propagate: false, parameters: [
+                deployBuild = build(job: pkgBuildJobName, propagate: false, parameters: [
                     [$class: 'StringParameterValue', name: 'SOURCE_URL', value: "${sourceArr[0]}"],
                     [$class: 'StringParameterValue', name: 'SOURCE_REFSPEC', value: "${sourceArr[1]}"],
                 ])
@@ -147,7 +171,7 @@ node('cz7918') {
                   def buildSteps = [:]
                   restPost(aptlyServer, '/api/repos', "{\"Name\": \"${aptlyRepo}\"}")
                   def debFiles = sh script: 'ls *.deb', returnStdout: true
-                  for (file in debFiles.tokenize()) {                  
+                  for (file in debFiles.tokenize()) {
                     buildSteps[file.split('_')[0]] = aptly.uploadPackageStep(
                           file,
                           APTLY_API_URL,
@@ -182,7 +206,8 @@ node('cz7918') {
                         testBuilds["${release}"] = build job: "oscore-formula-virtual_mcp11_aio-${release}-stable", propagate: false, parameters: [
                             [$class: 'StringParameterValue', name: 'STACK_RECLASS_ADDRESS', value: "${STACK_RECLASS_ADDRESS}"],
                             [$class: 'StringParameterValue', name: 'STACK_RECLASS_BRANCH', value: "stable/${release}"],
-                            [$class: 'TextParameterValue', name: 'BOOTSTRAP_EXTRA_REPO_PARAMS', value: extraRepo],                            
+                            [$class: 'TextParameterValue', name: 'BOOTSTRAP_EXTRA_REPO_PARAMS', value: extraRepo],
+                            [$class: 'BooleanParameterValue', name: 'STACK_DELETE', value: stackDelete],
                         ]
                     }
                 }
