@@ -119,7 +119,7 @@ if (common.validInputParam('SOURCES')) {
     sources = SOURCES
 } else {
     if (common.validInputParam('GERRIT_REFSPEC')) {        
-        sources = "${GERRIT_SCHEME}://${GERRIT_HOST}:${GERRIT_PORT}/${GERRIT_PROJECT} ${GERRIT_REFSPEC}"
+        sources = "${GERRIT_SCHEME}://mcp-jenkins@${GERRIT_HOST}:${GERRIT_PORT}/${GERRIT_PROJECT} ${GERRIT_REFSPEC}"
     }
 }
 
