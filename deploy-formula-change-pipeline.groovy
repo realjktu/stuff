@@ -14,6 +14,14 @@
 *                           Format: <Git URL1> <REFSPEC1>\n<Git URL2> <REFSPEC2>
 *    STACK_RECLASS_ADDRESS  Git URL to reclass model to use for deployment.
 *    PKG_BUILD_JOB_NAME     Jenkins job name to build pakages. Default: oscore-ci-build-formula-change
+*    GERRIT_*               Gerrit trigger plugin variables. 
+*    
+*    There are 2 options to run the pipeline:
+*    1. Manually.
+*       In this case need to define SOURCES parameter. See above.
+*    2. Automatically by Gerrit trigger.
+*       In this case Gerrit trigger adds GERRIT_* paramters to the build and the pipeline will use it.
+*       SOURCES parameter should be empty.
 *
 */
 
@@ -114,15 +122,18 @@ try {
   stackDelete = true
 }
 
+// This is a workaroud for jenkins on mc0n1-kha.kha.mirantis.net. Need to change Gerrit name in the Jenkins config. 
+GERRIT_NAME='mcp-jenkins'
 def sources
 if (common.validInputParam('SOURCES')) {
     sources = SOURCES
-} else {
-    if (common.validInputParam('GERRIT_REFSPEC')) {       
+} else if (common.validInputParam('GERRIT_REFSPEC')) {       
         sources = "${GERRIT_SCHEME}://${GERRIT_NAME}@${GERRIT_HOST}:${GERRIT_PORT}/${GERRIT_PROJECT} ${GERRIT_REFSPEC}" 
-        //sources = "${GERRIT_SCHEME}://mcp-jenkins@${GERRIT_HOST}:${GERRIT_PORT}/${GERRIT_PROJECT} ${GERRIT_REFSPEC}"
-    }
+} else {
+    common.errorMsg("SOURCES or GERRIT_* parameters are empty.")
+    currentBuild.result = 'FAILURE'
 }
+
 
 node('python') {
     def aptlyServer = ['url': APTLY_API_URL]
