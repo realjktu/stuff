@@ -73,9 +73,13 @@ node('docker') {
         def scmVars = checkout changelog: true, poll: false,
           scm: [$class: 'GitSCM', branches: pollBranches, doGenerateSubmoduleConfigurations: false,
           extensions: extensions,  submoduleCfg: [], userRemoteConfigs: userRemoteConfigs]
-        println(scmVars.toString())
         if (debian_branch){
-          sh('git checkout ' + DEBIAN_BRANCH)
+          def debianBranchAmount = sh(script: "git branch -r | grep '${debian_branch}' | wc -l", returnStdout: true)
+          if (debianBranchAmount > 0) {
+            sh('git checkout ' + DEBIAN_BRANCH)
+          } else {
+            common.warningMsg("There is no ${DEBIAN_BRANCH} branch. Going to build package by ${SOURCE_BRANCH} branch.")
+          }
         }
       }      
       debian.cleanup(OS + ':' + DIST)
