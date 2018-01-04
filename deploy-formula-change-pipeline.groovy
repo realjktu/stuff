@@ -83,6 +83,15 @@ def restPost(master, uri, data = null) {
     return restCall(master, uri, 'POST', data, ['Accept': '*/*'])
 }
 
+def restDel(master, uri, data = null) {
+    return restCall(master, uri, 'DELETE', data)
+}
+
+def aptlyCleanup(aptlyServer, aptlyPrefix, aptlyRepo){
+    restDel(aptlyServer, "/api/publish/${aptlyPrefix}/${aptlyRepo}")
+    restDel(aptlyServer, "/api/repos/${aptlyRepo}")
+}
+
 
 def common = new com.mirantis.mk.Common()
 def aptly = new com.mirantis.mk.Aptly()
@@ -122,6 +131,10 @@ if (common.validInputParam('SOURCES')) {
     currentBuild.result = 'FAILURE'
 }
 
+def aptlyPrefix = 'oscc-test'
+if (common.validInputParam('APTLY_PREFIX')) {
+    aptlyPrefix = APTLY_PREFIX
+}
 
 node('python') {
     def aptlyServer = ['url': APTLY_API_URL]
@@ -183,7 +196,7 @@ node('python') {
                 }
 
                 stage('publish to Aptly') {
-                    restPost(aptlyServer, '/api/publish/:.', "{\"SourceKind\": \"local\", \"Sources\": [{\"Name\": \"${aptlyRepo}\"}], \"Architectures\": [\"amd64\"], \"Distribution\": \"${aptlyRepo}\"}")
+                    restPost(aptlyServer, '/api/publish/${aptlyPrefix}', "{\"SourceKind\": \"local\", \"Sources\": [{\"Name\": \"${aptlyRepo}\"}], \"Architectures\": [\"amd64\"], \"Distribution\": \"${aptlyRepo}\"}")
                 }
             } catch (Exception e) {
                 currentBuild.result = 'FAILURE'
@@ -227,6 +240,8 @@ node('python') {
             currentBuild.result = 'FAILURE'
         }
     }
+    aptlyCleanup(aptlyServer, aptlyPrefix, aptlyRepo)
+    
 // end of node
 }
 
