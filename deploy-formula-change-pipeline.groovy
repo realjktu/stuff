@@ -107,7 +107,10 @@ def aptlyCleanup(aptlyServer, aptlyPrefix, aptlyRepo){
         restDel(aptlyServer, "/aaaapi/publish/${aptlyPrefix}/${aptlyRepo}")
         restDel(aptlyServer, "/api/repos/${aptlyRepo}")
     } catch (Exception e) {
+        common.warningMsg("Exception during aptlyCleanup. Message: " + e.toString())
         common.warningMsg("Exception during aptlyCleanup. Message: " + e.getMessage())
+        common.warningMsg("Exception during aptlyCleanup. Message: " + e.getStackTrace())
+
     }
 }
 
