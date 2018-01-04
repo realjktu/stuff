@@ -104,13 +104,10 @@ def restDel(master, uri, data = null) {
 def aptlyCleanup(aptlyServer, aptlyPrefix, aptlyRepo){
     def common = new com.mirantis.mk.Common()
     try {
-        restDel(aptlyServer, "/aaaapi/publish/${aptlyPrefix}/${aptlyRepo}")
+        restDel(aptlyServer, "/api/publish/${aptlyPrefix}/${aptlyRepo}")
         restDel(aptlyServer, "/api/repos/${aptlyRepo}")
     } catch (Exception e) {
         common.warningMsg("Exception during aptlyCleanup. Message: " + e.toString())
-        common.warningMsg("Exception during aptlyCleanup. Message: " + e.getMessage())
-        common.warningMsg("Exception during aptlyCleanup. Message: " + e.getStackTrace())
-
     }
 }
 
@@ -218,7 +215,7 @@ node('python') {
                     }
                 }
                 stage('publish to Aptly') {
-                    restPost(aptlyServer, "/api/publish/${aptlyPrefix}", "{\"SourceKind\": \"local\", \"Sources\": [{\"Name\": \"${aptlyRepo}\"}], \"Architectures\": [\"amd64\"], \"Distribution\": \"${aptlyRepo}\"}")                
+                    restPost(aptlyServer, "/aaapi/publish/${aptlyPrefix}", "{\"SourceKind\": \"local\", \"Sources\": [{\"Name\": \"${aptlyRepo}\"}], \"Architectures\": [\"amd64\"], \"Distribution\": \"${aptlyRepo}\"}")                
                 }
             }
         }
@@ -234,7 +231,7 @@ node('python') {
                     def release = openstack_release
                     deploy_release["OpenStack ${release} deployment"] = {
                         node('oscore-testing') {
-                            testBuilds["${release}"] = build job: "ooooscore-MCP1.1-virtual_mcp11_aio-${release}-stable", propagate: false, parameters: [
+                            testBuilds["${release}"] = build job: "oscore-MCP1.1-virtual_mcp11_aio-${release}-stable", propagate: false, parameters: [
                                 [$class: 'StringParameterValue', name: 'STACK_RECLASS_ADDRESS', value: "${STACK_RECLASS_ADDRESS}"],
                                 [$class: 'StringParameterValue', name: 'STACK_RECLASS_BRANCH', value: "stable/${release}"],
                                 [$class: 'TextParameterValue', name: 'BOOTSTRAP_EXTRA_REPO_PARAMS', value: extraRepo],
