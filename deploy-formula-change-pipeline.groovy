@@ -87,47 +87,35 @@ def restPost(master, uri, data = null) {
 def common = new com.mirantis.mk.Common()
 def aptly = new com.mirantis.mk.Aptly()
 
-def buildPackage
-try {
-  buildPackage = BUILD_PACKAGE.toBoolean()
-} catch (MissingPropertyException e) {
-  buildPackage = true
+def buildPackage = true
+if (common.validInputParam('BUILD_PACKAGE')) {
+    buildPackage = BUILD_PACKAGE.toBoolean()
 }
 
-def aptlyRepo
-try {
-  aptlyRepo = APTLY_REPO
-} catch (MissingPropertyException e) {
-  aptlyRepo = null
+def aptlyRepo = ''
+if (common.validInputParam('APTLY_REPO')) {
+    aptlyRepo = APTLY_REPO
 }
 
-def uploadAptly
-try {
-  uploadAptly = UPLOAD_APTLY.toBoolean()
-} catch (MissingPropertyException e) {
-  uploadAptly = true
+def uploadAptly = true
+if (common.validInputParam('UPLOAD_APTLY')) {
+    uploadAptly = UPLOAD_APTLY.toBoolean()
 }
 
-def pkgBuildJobName
-try {
-  pkgBuildJobName = PKG_BUILD_JOB_NAME
-} catch (MissingPropertyException e) {
-  pkgBuildJobName = 'oscore-ci-build-formula-change'
+def pkgBuildJobName = 'oscore-ci-build-formula-change'
+if (common.validInputParam('PKG_BUILD_JOB_NAME')) {
+    pkgBuildJobName = PKG_BUILD_JOB_NAME
 }
 
-def stackDelete
-try {
-  stackDelete = STACK_DELETE.toBoolean()
-} catch (MissingPropertyException e) {
-  stackDelete = true
+def stackDelete = true
+if (common.validInputParam('STACK_DELETE')) {
+    stackDelete = STACK_DELETE.toBoolean()
 }
 
-// This is a workaroud for jenkins on mc0n1-kha.kha.mirantis.net. Need to change Gerrit name in the Jenkins config. 
-//GERRIT_NAME='mcp-jenkins'
 def sources
 if (common.validInputParam('SOURCES')) {
     sources = SOURCES
-} else if (common.validInputParam('GERRIT_REFSPEC')) {       
+} else if (common.validInputParam('GERRIT_REFSPEC')) {
         sources = "${GERRIT_SCHEME}://${GERRIT_NAME}@${GERRIT_HOST}:${GERRIT_PORT}/${GERRIT_PROJECT} ${GERRIT_REFSPEC}" 
 } else {
     common.errorMsg("SOURCES or GERRIT_* parameters are empty.")
