@@ -14,8 +14,8 @@
 *                           Format: <Git URL1> <REFSPEC1>\n<Git URL2> <REFSPEC2>
 *    STACK_RECLASS_ADDRESS  Git URL to reclass model to use for deployment.
 *    PKG_BUILD_JOB_NAME     Jenkins job name to build pakages. Default: oscore-ci-build-formula-change
-*    GERRIT_*               Gerrit trigger plugin variables. 
-*    
+*    GERRIT_*               Gerrit trigger plugin variables.
+*
 *    There are 2 options to run the pipeline:
 *    1. Manually.
 *       In this case need to define SOURCES parameter. See above.
@@ -103,15 +103,15 @@ def restDel(master, uri, data = null) {
  */
 def aptlyCleanup(aptlyServer, aptlyPrefix, aptlyRepo){
     def common = new com.mirantis.mk.Common()
-    try {        
+    try {
         restDel(aptlyServer, "/api/publish/${aptlyPrefix}/${aptlyRepo}")
     } catch (Exception e) {
-        common.warningMsg("Exception during Aptly unpublish. Message: " + e.toString())
-    }    
-    try {        
+        common.warningMsg('Exception during Aptly unpublish. Message: ' + e.toString())
+    }
+    try {
         restDel(aptlyServer, "/api/repos/${aptlyRepo}")
     } catch (Exception e) {
-        common.warningMsg("Exception during Aptly repo delete. Message: " + e.toString())
+        common.warningMsg('Exception during Aptly repo delete. Message: ' + e.toString())
     }
 }
 
@@ -147,13 +147,13 @@ def sources
 if (common.validInputParam('SOURCES')) {
     sources = SOURCES
 } else if (common.validInputParam('GERRIT_REFSPEC')) {
-        sources = "${GERRIT_SCHEME}://${GERRIT_NAME}@${GERRIT_HOST}:${GERRIT_PORT}/${GERRIT_PROJECT} ${GERRIT_REFSPEC}" 
+        sources = "${GERRIT_SCHEME}://${GERRIT_NAME}@${GERRIT_HOST}:${GERRIT_PORT}/${GERRIT_PROJECT} ${GERRIT_REFSPEC}"
 } else {
-    common.errorMsg("SOURCES or GERRIT_* parameters are empty.")
+    common.errorMsg('SOURCES or GERRIT_* parameters are empty.')
     currentBuild.result = 'FAILURE'
 }
 
-def aptlyPrefix = 'oscc-test'
+def aptlyPrefix = 'oscc-dev'
 if (common.validInputParam('APTLY_PREFIX')) {
     aptlyPrefix = APTLY_PREFIX
 }
@@ -181,7 +181,7 @@ node('python') {
         deleteDir()
     }
     if (buildPackage) {
-        stage('Build packages') {            
+        stage('Build packages') {
             for (source in sources.tokenize('\n')) {
                 sourceArr = source.tokenize(' ')
                 deployBuild = build(job: pkgBuildJobName, propagate: false, parameters: [
@@ -224,7 +224,7 @@ node('python') {
                     }
                 }
                 stage('publish to Aptly') {
-                    restPost(aptlyServer, "/api/publish/${aptlyPrefix}", "{\"SourceKind\": \"local\", \"Sources\": [{\"Name\": \"${aptlyRepo}\"}], \"Architectures\": [\"amd64\"], \"Distribution\": \"${aptlyRepo}\"}")                
+                    restPost(aptlyServer, "/api/publish/${aptlyPrefix}", "{\"SourceKind\": \"local\", \"Sources\": [{\"Name\": \"${aptlyRepo}\"}], \"Architectures\": [\"amd64\"], \"Distribution\": \"${aptlyRepo}\"}")
                 }
             }
         }
