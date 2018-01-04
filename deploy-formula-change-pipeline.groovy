@@ -196,7 +196,7 @@ node('python') {
                 }
 
                 stage('publish to Aptly') {
-                    restPost(aptlyServer, '/api/publish/${aptlyPrefix}', "{\"SourceKind\": \"local\", \"Sources\": [{\"Name\": \"${aptlyRepo}\"}], \"Architectures\": [\"amd64\"], \"Distribution\": \"${aptlyRepo}\"}")
+                    restPost(aptlyServer, "/api/publish/${aptlyPrefix}", "{\"SourceKind\": \"local\", \"Sources\": [{\"Name\": \"${aptlyRepo}\"}], \"Architectures\": [\"amd64\"], \"Distribution\": \"${aptlyRepo}\"}")
                 }
             } catch (Exception e) {
                 currentBuild.result = 'FAILURE'
@@ -241,7 +241,7 @@ node('python') {
         }
     }
     aptlyCleanup(aptlyServer, aptlyPrefix, aptlyRepo)
-    
+
 // end of node
 }
 
