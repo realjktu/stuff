@@ -83,15 +83,32 @@ def restPost(master, uri, data = null) {
     return restCall(master, uri, 'POST', data, ['Accept': '*/*'])
 }
 
+/**
+ * Make DEL request by REST API and return parsed JSON
+ *
+ * @param master   Salt connection object
+ * @param uri   URI which will be appended to Docker server base URL
+ * @param data  JSON Data to PUT
+ */
 def restDel(master, uri, data = null) {
     return restCall(master, uri, 'DELETE', data)
 }
 
+/**
+ * Unpublish and delete Aptly repo by REST API
+ *
+ * @param aptlyServer Aptly connection object
+ * @param aptlyPrefix Aptly prefix where need to delete a repo
+ * @param aptlyRepo  Aptly repo name
+ */
 def aptlyCleanup(aptlyServer, aptlyPrefix, aptlyRepo){
-    restDel(aptlyServer, "/api/publish/${aptlyPrefix}/${aptlyRepo}")
-    restDel(aptlyServer, "/api/repos/${aptlyRepo}")
+    try {
+        restDel(aptlyServer, "/api/publish/${aptlyPrefix}/${aptlyRepo}")
+        restDel(aptlyServer, "/api/repos/${aptlyRepo}")
+    } catch (Exception e) {
+        common.warningMsg("Exception during aptlyCleanup. Message: " + e.getMessage())
+    }
 }
-
 
 def common = new com.mirantis.mk.Common()
 def aptly = new com.mirantis.mk.Aptly()
@@ -177,71 +194,74 @@ node('python') {
         }
     }
 
-    dir('build-area'){
-        if (uploadAptly && buildPackage) {
-            try {
-                stage('upload to Aptly') {
-                  def buildSteps = [:]
-                  restPost(aptlyServer, '/api/repos', "{\"Name\": \"${aptlyRepo}\"}")
-                  def debFiles = sh script: 'ls *.deb', returnStdout: true
-                  for (file in debFiles.tokenize()) {
-                    buildSteps[file.split('_')[0]] = aptly.uploadPackageStep(
-                          file,
-                          APTLY_API_URL,
-                          aptlyRepo,
-                          true
-                      )
-                  }
-                  parallel buildSteps
-                }
-
-                stage('publish to Aptly') {
-                    restPost(aptlyServer, "/api/publish/${aptlyPrefix}", "{\"SourceKind\": \"local\", \"Sources\": [{\"Name\": \"${aptlyRepo}\"}], \"Architectures\": [\"amd64\"], \"Distribution\": \"${aptlyRepo}\"}")
-                }
-            } catch (Exception e) {
-                currentBuild.result = 'FAILURE'
-                throw e
-            }
-        }
-    }
-
-    if (OPENSTACK_RELEASES) {
-        def deploy_release = [:]
-        def testBuilds = [:]
-        URI aptlyUri = new URI(APTLY_REPO_URL)
-        def aptlyHost = aptlyUri.getHost()
-        def extraRepo = "deb [ arch=amd64 trusted=yes ] ${APTLY_REPO_URL} ${aptlyRepo} main,1200,origin ${aptlyHost}"
-        stage('Deploying environment and testing'){
-            for (openstack_release in OPENSTACK_RELEASES.tokenize(',')) {
-                def release = openstack_release
-                deploy_release["OpenStack ${release} deployment"] = {
-                    node('oscore-testing') {
-                        testBuilds["${release}"] = build job: "oscore-MCP1.1-virtual_mcp11_aio-${release}-stable", propagate: false, parameters: [
-                            [$class: 'StringParameterValue', name: 'STACK_RECLASS_ADDRESS', value: "${STACK_RECLASS_ADDRESS}"],
-                            [$class: 'StringParameterValue', name: 'STACK_RECLASS_BRANCH', value: "stable/${release}"],
-                            [$class: 'TextParameterValue', name: 'BOOTSTRAP_EXTRA_REPO_PARAMS', value: extraRepo],
-                            [$class: 'BooleanParameterValue', name: 'STACK_DELETE', value: stackDelete],
-                        ]
+    try {
+        dir('build-area'){
+            lock('aptly-api') {
+                if (uploadAptly && buildPackage) {
+                    stage('upload to Aptly') {
+                        def buildSteps = [:]
+                        restPost(aptlyServer, '/api/repos', "{\"Name\": \"${aptlyRepo}\"}")
+                        def debFiles = sh script: 'ls *.deb', returnStdout: true
+                        for (file in debFiles.tokenize()) {
+                        buildSteps[file.split('_')[0]] = aptly.uploadPackageStep(
+                            file,
+                            APTLY_API_URL,
+                            aptlyRepo,
+                            true
+                            )
+                        }
+                        parallel buildSteps
                     }
                 }
-            }
-            parallel deploy_release
-        }
-        def notToPromote
-        stage('Managing deployment results') {
-            for (k in testBuilds.keySet()) {
-                if (testBuilds[k].result != 'SUCCESS') {
-                    notToPromote = true
+                stage('publish to Aptly') {
+                    restPost(aptlyServer, "/api/publish/${aptlyPrefix}", "{\"SourceKind\": \"local\", \"Sources\": [{\"Name\": \"${aptlyRepo}\"}], \"Architectures\": [\"amd64\"], \"Distribution\": \"${aptlyRepo}\"}")                
                 }
-                println(k + ': ' + testBuilds[k].result)
             }
         }
-        if (notToPromote) {
-            currentBuild.result = 'FAILURE'
+
+        if (OPENSTACK_RELEASES) {
+            def deploy_release = [:]
+            def testBuilds = [:]
+            URI aptlyUri = new URI(APTLY_REPO_URL)
+            def aptlyHost = aptlyUri.getHost()
+            def extraRepo = "deb [ arch=amd64 trusted=yes ] ${APTLY_REPO_URL}/${aptlyPrefix} ${aptlyRepo} main,1200,origin ${aptlyHost}"
+            stage('Deploying environment and testing'){
+                for (openstack_release in OPENSTACK_RELEASES.tokenize(',')) {
+                    def release = openstack_release
+                    deploy_release["OpenStack ${release} deployment"] = {
+                        node('oscore-testing') {
+                            testBuilds["${release}"] = build job: "oscore-MCP1.1-virtual_mcp11_aio-${release}-stable", propagate: false, parameters: [
+                                [$class: 'StringParameterValue', name: 'STACK_RECLASS_ADDRESS', value: "${STACK_RECLASS_ADDRESS}"],
+                                [$class: 'StringParameterValue', name: 'STACK_RECLASS_BRANCH', value: "stable/${release}"],
+                                [$class: 'TextParameterValue', name: 'BOOTSTRAP_EXTRA_REPO_PARAMS', value: extraRepo],
+                                [$class: 'BooleanParameterValue', name: 'STACK_DELETE', value: stackDelete],
+                            ]
+                        }
+                    }
+                }
+                parallel deploy_release
+            }
+            def notToPromote
+            stage('Managing deployment results') {
+                for (k in testBuilds.keySet()) {
+                    if (testBuilds[k].result != 'SUCCESS') {
+                        notToPromote = true
+                    }
+                    println(k + ': ' + testBuilds[k].result)
+                }
+            }
+            if (notToPromote) {
+                currentBuild.result = 'FAILURE'
+            }
+        }
+    } catch (Exception e) {
+        currentBuild.result = 'FAILURE'
+        throw e
+    } finally {
+        lock('aptly-api') {
+            aptlyCleanup(aptlyServer, aptlyPrefix, aptlyRepo)
         }
     }
-    aptlyCleanup(aptlyServer, aptlyPrefix, aptlyRepo)
-
 // end of node
 }
 
