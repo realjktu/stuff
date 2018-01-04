@@ -103,7 +103,7 @@ def restDel(master, uri, data = null) {
  */
 def aptlyCleanup(aptlyServer, aptlyPrefix, aptlyRepo){
     try {
-        restDel(aptlyServer, "/api/publish/${aptlyPrefix}/${aptlyRepo}")
+        restDel(aptlyServer, "/aaaapi/publish/${aptlyPrefix}/${aptlyRepo}")
         restDel(aptlyServer, "/api/repos/${aptlyRepo}")
     } catch (Exception e) {
         common.warningMsg("Exception during aptlyCleanup. Message: " + e.getMessage())
@@ -230,7 +230,7 @@ node('python') {
                     def release = openstack_release
                     deploy_release["OpenStack ${release} deployment"] = {
                         node('oscore-testing') {
-                            testBuilds["${release}"] = build job: "oooooscore-MCP1.1-virtual_mcp11_aio-${release}-stable", propagate: false, parameters: [
+                            testBuilds["${release}"] = build job: "ooooscore-MCP1.1-virtual_mcp11_aio-${release}-stable", propagate: false, parameters: [
                                 [$class: 'StringParameterValue', name: 'STACK_RECLASS_ADDRESS', value: "${STACK_RECLASS_ADDRESS}"],
                                 [$class: 'StringParameterValue', name: 'STACK_RECLASS_BRANCH', value: "stable/${release}"],
                                 [$class: 'TextParameterValue', name: 'BOOTSTRAP_EXTRA_REPO_PARAMS', value: extraRepo],
