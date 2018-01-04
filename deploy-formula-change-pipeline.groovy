@@ -102,6 +102,7 @@ def restDel(master, uri, data = null) {
  * @param aptlyRepo  Aptly repo name
  */
 def aptlyCleanup(aptlyServer, aptlyPrefix, aptlyRepo){
+    def common = new com.mirantis.mk.Common()
     try {
         restDel(aptlyServer, "/aaaapi/publish/${aptlyPrefix}/${aptlyRepo}")
         restDel(aptlyServer, "/api/repos/${aptlyRepo}")
