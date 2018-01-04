@@ -123,7 +123,7 @@ try {
 }
 
 // This is a workaroud for jenkins on mc0n1-kha.kha.mirantis.net. Need to change Gerrit name in the Jenkins config. 
-GERRIT_NAME='mcp-jenkins'
+//GERRIT_NAME='mcp-jenkins'
 def sources
 if (common.validInputParam('SOURCES')) {
     sources = SOURCES
