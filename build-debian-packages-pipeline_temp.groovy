@@ -70,9 +70,10 @@ node('docker') {
           extensions.add([$class: 'LocalBranch', localBranch: SOURCE_BRANCH])
           userRemoteConfigs[0]['refspec'] = SOURCE_REFSPEC
         }
-        checkout changelog: true, poll: false,
+        def scmVars = checkout changelog: true, poll: false,
           scm: [$class: 'GitSCM', branches: pollBranches, doGenerateSubmoduleConfigurations: false,
           extensions: extensions,  submoduleCfg: [], userRemoteConfigs: userRemoteConfigs]
+        println(scmVars.toString())
         if (debian_branch){
           sh('git checkout ' + DEBIAN_BRANCH)
         }
