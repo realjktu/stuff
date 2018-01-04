@@ -75,7 +75,7 @@ node('docker') {
           extensions: extensions,  submoduleCfg: [], userRemoteConfigs: userRemoteConfigs]
         if (debian_branch){
           def debianBranchAmount = sh(script: "git branch -r | grep '${debian_branch}' | wc -l", returnStdout: true)
-          if (debianBranchAmount > 0) {
+          if (debianBranchAmount == '1') {
             sh('git checkout ' + DEBIAN_BRANCH)
           } else {
             common.warningMsg("There is no ${DEBIAN_BRANCH} branch. Going to build package by ${SOURCE_BRANCH} branch.")
