@@ -103,11 +103,15 @@ def restDel(master, uri, data = null) {
  */
 def aptlyCleanup(aptlyServer, aptlyPrefix, aptlyRepo){
     def common = new com.mirantis.mk.Common()
-    try {
+    try {        
         restDel(aptlyServer, "/api/publish/${aptlyPrefix}/${aptlyRepo}")
+    } catch (Exception e) {
+        common.warningMsg("Exception during Aptly unpublish. Message: " + e.toString())
+    }    
+    try {        
         restDel(aptlyServer, "/api/repos/${aptlyRepo}")
     } catch (Exception e) {
-        common.warningMsg("Exception during aptlyCleanup. Message: " + e.toString())
+        common.warningMsg("Exception during Aptly repo delete. Message: " + e.toString())
     }
 }
 
@@ -215,7 +219,7 @@ node('python') {
                     }
                 }
                 stage('publish to Aptly') {
-                    restPost(aptlyServer, "/aaapi/publish/${aptlyPrefix}", "{\"SourceKind\": \"local\", \"Sources\": [{\"Name\": \"${aptlyRepo}\"}], \"Architectures\": [\"amd64\"], \"Distribution\": \"${aptlyRepo}\"}")                
+                    restPost(aptlyServer, "/api/publish/${aptlyPrefix}", "{\"SourceKind\": \"local\", \"Sources\": [{\"Name\": \"${aptlyRepo}\"}], \"Architectures\": [\"amd64\"], \"Distribution\": \"${aptlyRepo}\"}")                
                 }
             }
         }
