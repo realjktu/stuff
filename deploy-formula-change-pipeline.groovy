@@ -258,8 +258,10 @@ node('python') {
         currentBuild.result = 'FAILURE'
         throw e
     } finally {
-        lock('aptly-api') {
-            aptlyCleanup(aptlyServer, aptlyPrefix, aptlyRepo)
+        stage('Cleanup Aptly') {
+            lock('aptly-api') {
+                aptlyCleanup(aptlyServer, aptlyPrefix, aptlyRepo)
+            }
         }
     }
 // end of node
