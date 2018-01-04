@@ -158,6 +158,11 @@ if (common.validInputParam('APTLY_PREFIX')) {
     aptlyPrefix = APTLY_PREFIX
 }
 
+def systestJobPrefix = 'oscore-formula-systest-virtual_mcp11_aio-'
+if (common.validInputParam('SYSTEST_JOB_PREFIX')) {
+    systestJobPrefix = SYSTEST_JOB_PREFIX
+}
+
 node('python') {
     def aptlyServer = ['url': APTLY_API_URL]
     wrap([$class: 'BuildUser']) {
@@ -235,7 +240,7 @@ node('python') {
                     def release = openstack_release
                     deploy_release["OpenStack ${release} deployment"] = {
                         node('oscore-testing') {
-                            testBuilds["${release}"] = build job: "oscore-MCP1.1-virtual_mcp11_aio-${release}-stable", propagate: false, parameters: [
+                            testBuilds["${release}"] = build job: "${systestJobPrefix}${release}", propagate: false, parameters: [
                                 [$class: 'StringParameterValue', name: 'STACK_RECLASS_ADDRESS', value: "${STACK_RECLASS_ADDRESS}"],
                                 [$class: 'StringParameterValue', name: 'STACK_RECLASS_BRANCH', value: "stable/${release}"],
                                 [$class: 'TextParameterValue', name: 'BOOTSTRAP_EXTRA_REPO_PARAMS', value: extraRepo],
