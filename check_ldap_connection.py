@@ -37,7 +37,18 @@ entry_list = c.search(search_base = search_base,
          search_scope = SUBTREE,
          attributes = [ALL_ATTRIBUTES, ALL_OPERATIONAL_ATTRIBUTES],
          )
+
 print("Domain users:")
+LDAP_USER_FORMAT = '''-----------------------------------------
+Logon Name: {logon_name}
+UPN: {user_principal_name}
+Full Name: {full_name}
+First Name: {first_name}
+Last Name: {last_name}
+Email: {email}
+Display Name: {display_name}
+Groups: {groups}'''
+
 for entry in c.response:
     items = entry['attributes'].get('memberOf', '')   
     groups = []
@@ -51,15 +62,6 @@ for entry in c.response:
     last_name = entry['attributes'].get('sn', '')
     email = entry['attributes'].get('mail', '')
     display_name = entry['attributes'].get('displayName', '')
-    LDAP_USER_FORMAT = '''-----------------------------------------
-Logon Name: {logon_name}
-UPN: {user_principal_name}
-Full Name: {full_name}
-First Name: {first_name}
-Last Name: {last_name}
-Email: {email}
-Display Name: {display_name}
-Groups: {groups}'''
     print(LDAP_USER_FORMAT.format(
             logon_name=logon_name,
             user_principal_name=user_principal_name,
