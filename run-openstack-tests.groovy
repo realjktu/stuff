@@ -87,9 +87,9 @@ node(slave_node) {
 
         stage ('Generate tempest configuration') {
             salt.runSaltProcessStep(saltMaster, TEST_TEMPEST_TARGET, 'file.mkdir', [reports_dir])
-            salt.runSaltProcessStep(saltMaster, TEST_TEMPEST_TARGET, 'runtest.generate_tempest_config', ["${reports_dir}/mcp_aio_auto.conf"])
+            salt.runSaltProcessStep(saltMaster, TEST_TEMPEST_TARGET, 'runtest.generate_tempest_config', ["${reports_dir}/${TEST_TEMPEST_CONF}"])
         }
-        eeexxxit
+        //eeexxxit
 
 
         if (common.checkContains('TEST_DOCKER_INSTALL', 'true')) {
