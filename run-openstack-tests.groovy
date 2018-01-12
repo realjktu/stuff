@@ -85,14 +85,18 @@ node(slave_node) {
             }
         }
 
+        stage ('Generate tempest configuration') {
+            salt.runSaltProcessStep(saltMaster, TEST_TEMPEST_TARGET, 'file.mkdir', [reports_dir])
+            salt.runSaltProcessStep(saltMaster, TEST_TEMPEST_TARGET, 'runtest.generate_tempest_config', ["${reports_dir}/mcp_aio_auto.conf"])
+        }
+        eeexxxit
+
+
         if (common.checkContains('TEST_DOCKER_INSTALL', 'true')) {
             test.install_docker(saltMaster, TEST_TEMPEST_TARGET)
         }
 
         // TODO: implement stepler testing from this pipeline
-        //salt.runSaltProcessStep(saltMaster, TEST_TEMPEST_TARGET, 'file.mkdir', [reports_dir])
-        salt.runSaltProcessStep(saltMaster, TEST_TEMPEST_TARGET, 'runtest.generate_tempest_config', ["${reports_dir}/mcp_aio_auto.conf"])
-        eeexxxit
         stage('Run OpenStack tests') {
             test.runTempestTests(saltMaster, TEST_TEMPEST_IMAGE,
                                              TEST_TEMPEST_TARGET,
