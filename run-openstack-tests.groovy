@@ -111,7 +111,7 @@ node(slave_node) {
                                              '/home/rally/keystonercv3',
                                              'full',
                                              test_tempest_concurrency,
-                                             "/home/rally/rally_reports/tempest_auto.conf")
+                                             "../tempest_auto.conf")
             def tempest_stdout
             tempest_stdout = salt.cmdRun(saltMaster, TEST_TEMPEST_TARGET, "cat ${reports_dir}/report_full_*.log", true, null, false)['return'][0].values()[0].replaceAll('Salt command execution success', '')
             common.infoMsg('Short test report:')
