@@ -28,6 +28,7 @@
  *   TEST_PASS_THRESHOLD          Persent of passed tests to consider build successful
  *   SLAVE_NODE                   Label or node name where the job will be run
  *   USE_PEPPER                   Whether to use pepper for connection to salt master
+ *   AUTO_TEMPEST_CONFIG          Whether to genarate tempest configuration automatically
  *
  */
 
@@ -85,9 +86,11 @@ node(slave_node) {
             }
         }
 
-        stage ('Generate tempest configuration') {
-            salt.runSaltProcessStep(saltMaster, TEST_TEMPEST_TARGET, 'file.mkdir', [reports_dir])
-            salt.runSaltProcessStep(saltMaster, TEST_TEMPEST_TARGET, 'runtest.generate_tempest_config', ["${reports_dir}/${TEST_TEMPEST_CONF}"])
+        if (common.validInputParam('AUTO_TEMPEST_CONFIG') && AUTO_TEMPEST_CONFIG.toBoolean()) {
+            stage ('Generate tempest configuration') {
+                salt.runSaltProcessStep(saltMaster, TEST_TEMPEST_TARGET, 'file.mkdir', [reports_dir])
+                salt.runSaltProcessStep(saltMaster, TEST_TEMPEST_TARGET, 'runtest.generate_tempest_config', ["${reports_dir}/${TEST_TEMPEST_CONF}"])
+            }
         }
         //eeexxxit
 
