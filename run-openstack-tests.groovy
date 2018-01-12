@@ -88,8 +88,11 @@ node(slave_node) {
 
         if (common.validInputParam('AUTO_TEMPEST_CONFIG') && AUTO_TEMPEST_CONFIG.toBoolean()) {
             stage ('Generate tempest configuration') {
-                salt.runSaltProcessStep(saltMaster, TEST_TEMPEST_TARGET, 'file.mkdir', [reports_dir])
-                salt.runSaltProcessStep(saltMaster, TEST_TEMPEST_TARGET, 'rruntest.generate_tempest_config', ["${reports_dir}/${TEST_TEMPEST_CONF}"])
+                //salt.runSaltProcessStep(saltMaster, TEST_TEMPEST_TARGET, 'file.mkdir', [reports_dir])
+                //salt.runSaltProcessStep(saltMaster, TEST_TEMPEST_TARGET, 'rruntest.generate_tempest_config', ["${reports_dir}/${TEST_TEMPEST_CONF}"])                
+                //salt-call state.apply runtest pillar='{"runtest":{"tempest":{"cfg_name": "bar"}}}'
+                salt.enforceState(saltMaster, 'I@salt:master', ['runtest'], true)
+                ///home/rally/rally_reports/tempest_auto.conf                
             }
         }
         //eeexxxit
@@ -108,7 +111,7 @@ node(slave_node) {
                                              '/home/rally/keystonercv3',
                                              'full',
                                              test_tempest_concurrency,
-                                             TEST_TEMPEST_CONF)
+                                             "/home/rally/rally_reports/tempest_auto.conf")
             def tempest_stdout
             tempest_stdout = salt.cmdRun(saltMaster, TEST_TEMPEST_TARGET, "cat ${reports_dir}/report_full_*.log", true, null, false)['return'][0].values()[0].replaceAll('Salt command execution success', '')
             common.infoMsg('Short test report:')
