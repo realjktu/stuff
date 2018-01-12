@@ -90,6 +90,8 @@ node(slave_node) {
         }
 
         // TODO: implement stepler testing from this pipeline
+        salt.runSaltProcessStep(saltMaster, TEST_TEMPEST_TARGET, 'file.mkdir', ["/root/rally_reports/smoke"])
+        salt.runSaltProcessStep(saltMaster, TEST_TEMPEST_TARGET, 'runtest.generate_tempest_config', ["/root/rally_reports/smoke/mcp_aio_auto.conf"])
         stage('Run OpenStack tests') {
             test.runTempestTests(saltMaster, TEST_TEMPEST_IMAGE,
                                              TEST_TEMPEST_TARGET,
