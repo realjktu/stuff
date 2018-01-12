@@ -89,7 +89,7 @@ node(slave_node) {
         if (common.validInputParam('AUTO_TEMPEST_CONFIG') && AUTO_TEMPEST_CONFIG.toBoolean()) {
             stage ('Generate tempest configuration') {
                 salt.runSaltProcessStep(saltMaster, TEST_TEMPEST_TARGET, 'file.mkdir', [reports_dir])
-                salt.runSaltProcessStep(saltMaster, TEST_TEMPEST_TARGET, 'runtest.generate_tempest_config', ["${reports_dir}/${TEST_TEMPEST_CONF}"])
+                salt.runSaltProcessStep(saltMaster, TEST_TEMPEST_TARGET, 'rruntest.generate_tempest_config', ["${reports_dir}/${TEST_TEMPEST_CONF}"])
             }
         }
         //eeexxxit
