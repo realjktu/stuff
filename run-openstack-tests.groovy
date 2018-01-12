@@ -90,8 +90,9 @@ node(slave_node) {
         }
 
         // TODO: implement stepler testing from this pipeline
-        salt.runSaltProcessStep(saltMaster, TEST_TEMPEST_TARGET, 'file.mkdir', [log_dir])
-        salt.runSaltProcessStep(saltMaster, TEST_TEMPEST_TARGET, 'runtest.generate_tempest_config', ["${log_dir}/mcp_aio_auto.conf"])
+        //salt.runSaltProcessStep(saltMaster, TEST_TEMPEST_TARGET, 'file.mkdir', [reports_dir])
+        salt.runSaltProcessStep(saltMaster, TEST_TEMPEST_TARGET, 'runtest.generate_tempest_config', ["${reports_dir}/mcp_aio_auto.conf"])
+        eeexxxit
         stage('Run OpenStack tests') {
             test.runTempestTests(saltMaster, TEST_TEMPEST_IMAGE,
                                              TEST_TEMPEST_TARGET,
