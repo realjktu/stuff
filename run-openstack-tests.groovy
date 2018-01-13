@@ -10,6 +10,7 @@
  *    responsible for results check and upload to testrail
  *
  * Expected parameters:
+ *   LOCAL_TEMPEST_IMAGE          Path to docker image tar archive
  *   SALT_MASTER_URL              URL of Salt master
  *   SALT_MASTER_CREDENTIALS      Credentials to the Salt API
  *   TEST_TEMPEST_IMAGE           Docker image to run tempest
@@ -52,10 +53,12 @@ node(slave_node) {
     def reports_dir = "/root/rally_reports/${PROJECT}"
     def date = sh(script: 'date +%Y-%m-%d', returnStdout: true).trim()
     def testrail = false
+    def test_tempest_pattern = ''
     def test_milestone = ''
     def test_model = ''
     def venv = "${env.WORKSPACE}/venv"
     def test_tempest_concurrency = '0'
+    def test_tempest_set = 'full'
     def use_pepper = true
     if (common.validInputParam('USE_PEPPER')){
         use_pepper = USE_PEPPER.toBoolean()
@@ -94,7 +97,8 @@ node(slave_node) {
                 Assume tempest config will be generated into /root/rally_reports/tempest_generated.conf by runtest state.
                 i.e. /home/rally/rally_reports/tempest_generated.conf on docker tempest system.
                 */
-                test_tempest_conf = "/home/rally/rally_reports/tempest_generated.conf"
+                //test_tempest_conf = '/home/rally/rally_reports/tempest_generated.conf'
+                test_tempest_conf = '../tempest_generated.conf'
             }
         }
 
@@ -102,18 +106,30 @@ node(slave_node) {
             test.install_docker(saltMaster, TEST_TEMPEST_TARGET)
         }
 
+        if (common.validInputParam('LOCAL_TEMPEST_IMAGE')) {
+            salt.cmdRun(saltMaster, TEST_TEMPEST_TARGET, "docker load --input ${LOCAL_TEMPEST_IMAGE}", true, null, false)
+        }
+
         // TODO: implement stepler testing from this pipeline
         stage('Run OpenStack tests') {
+            if (common.validInputParam('TEST_TEMPEST_SET')) {
+                test_tempest_set = TEST_TEMPEST_SET
+                common.infoMsg('TEST_TEMPEST_SET is set, TEST_TEMPEST_PATTERN parameter will be ignored')
+            } else if (common.validInputParam('TEST_TEMPEST_PATTERN')) {
+                test_tempest_pattern = TEST_TEMPEST_PATTERN
+                common.infoMsg('TEST_TEMPEST_PATTERN is set, TEST_TEMPEST_CONCURRENCY and TEST_TEMPEST_SET parameters will be ignored')
+            }
+
             test.runTempestTests(saltMaster, TEST_TEMPEST_IMAGE,
                                              TEST_TEMPEST_TARGET,
-                                             TEST_TEMPEST_PATTERN,
+                                             test_tempest_pattern,
                                              log_dir,
                                              '/home/rally/keystonercv3',
-                                             'full',
+                                             test_tempest_set,
                                              test_tempest_concurrency,
                                              test_tempest_conf)
             def tempest_stdout
-            tempest_stdout = salt.cmdRun(saltMaster, TEST_TEMPEST_TARGET, "cat ${reports_dir}/report_full_*.log", true, null, false)['return'][0].values()[0].replaceAll('Salt command execution success', '')
+            tempest_stdout = salt.cmdRun(saltMaster, TEST_TEMPEST_TARGET, "cat ${reports_dir}/report_${test_tempest_set}_*.log", true, null, false)['return'][0].values()[0].replaceAll('Salt command execution success', '')
             common.infoMsg('Short test report:')
             common.infoMsg(tempest_stdout)
         }
