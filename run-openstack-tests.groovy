@@ -91,7 +91,7 @@ node(slave_node) {
                 //salt.runSaltProcessStep(saltMaster, TEST_TEMPEST_TARGET, 'file.mkdir', [reports_dir])
                 //salt.runSaltProcessStep(saltMaster, TEST_TEMPEST_TARGET, 'rruntest.generate_tempest_config', ["${reports_dir}/${TEST_TEMPEST_CONF}"])                
                 //salt-call state.apply runtest pillar='{"runtest":{"tempest":{"cfg_name": "bar"}}}'
-                salt.enforceState(saltMaster, 'I@salt:master', ['runtestt'], true)
+                salt.enforceState(saltMaster, 'I@salt:master', ['runtest'], true)
                 ///home/rally/rally_reports/tempest_auto.conf                
             }
         }
