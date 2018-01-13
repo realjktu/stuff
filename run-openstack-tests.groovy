@@ -86,17 +86,17 @@ node(slave_node) {
             }
         }
 
+        def test_tempest_conf=TEST_TEMPEST_CONF
         if (common.validInputParam('AUTO_TEMPEST_CONFIG') && AUTO_TEMPEST_CONFIG.toBoolean()) {
             stage ('Generate tempest configuration') {
-                //salt.runSaltProcessStep(saltMaster, TEST_TEMPEST_TARGET, 'file.mkdir', [reports_dir])
-                //salt.runSaltProcessStep(saltMaster, TEST_TEMPEST_TARGET, 'rruntest.generate_tempest_config', ["${reports_dir}/${TEST_TEMPEST_CONF}"])                
-                //salt-call state.apply runtest pillar='{"runtest":{"tempest":{"cfg_name": "bar"}}}'
-                salt.enforceState(saltMaster, 'I@salt:master', ['runtest'], true)
-                ///home/rally/rally_reports/tempest_auto.conf                
+                salt.enforceState(saltMaster, 'I@salt:master', ['runtest'], true)                
+                /*
+                Assume tempest config will be generated into /root/rally_reports/tempest_generated.conf
+                i.e. /home/rally/rally_reports/tempest_generated.conf on docker tempest system.
+                */
+                test_tempest_conf = "../tempest_generated.conf"
             }
         }
-        //eeexxxit
-
 
         if (common.checkContains('TEST_DOCKER_INSTALL', 'true')) {
             test.install_docker(saltMaster, TEST_TEMPEST_TARGET)
@@ -111,7 +111,7 @@ node(slave_node) {
                                              '/home/rally/keystonercv3',
                                              'full',
                                              test_tempest_concurrency,
-                                             "../tempest_auto.conf")
+                                             test_tempest_conf)
             def tempest_stdout
             tempest_stdout = salt.cmdRun(saltMaster, TEST_TEMPEST_TARGET, "cat ${reports_dir}/report_full_*.log", true, null, false)['return'][0].values()[0].replaceAll('Salt command execution success', '')
             common.infoMsg('Short test report:')
