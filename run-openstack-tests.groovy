@@ -91,10 +91,10 @@ node(slave_node) {
             stage ('Generate tempest configuration') {
                 salt.enforceState(saltMaster, 'I@salt:master', ['runtest'], true)                
                 /*
-                Assume tempest config will be generated into /root/rally_reports/tempest_generated.conf
+                Assume tempest config will be generated into /root/rally_reports/tempest_generated.conf by runtest state.
                 i.e. /home/rally/rally_reports/tempest_generated.conf on docker tempest system.
                 */
-                test_tempest_conf = "../tempest_generated.conf"
+                test_tempest_conf = "/home/rally/rally_reports/tempest_generated.conf"
             }
         }
 
