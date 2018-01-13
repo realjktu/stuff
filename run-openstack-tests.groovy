@@ -97,8 +97,7 @@ node(slave_node) {
                 Assume tempest config will be generated into /root/rally_reports/tempest_generated.conf by runtest state.
                 i.e. /home/rally/rally_reports/tempest_generated.conf on docker tempest system.
                 */
-                //test_tempest_conf = '/home/rally/rally_reports/tempest_generated.conf'
-                test_tempest_conf = '../tempest_generated.conf'
+                test_tempest_conf = '/home/rally/rally_reports/tempest_generated.conf'
             }
         }
 
