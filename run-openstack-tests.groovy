@@ -15,6 +15,12 @@
  *   SALT_MASTER_CREDENTIALS      Credentials to the Salt API
  *   TEST_TEMPEST_IMAGE           Docker image to run tempest
  *   TEST_TEMPEST_CONF            Tempest configuration file path inside container
+ *                                In case of runtest formula usage:
+ *                                    TEST_TEMPEST_CONF should be align to runtest:tempest:cfg_dir and runtest:tempest:cfg_name pillars and container mounts
+ *                                    Example: tempest config is generated into /root/rally_reports/tempest_generated.conf by runtest state.
+ *                                             Means /home/rally/rally_reports/tempest_generated.conf on docker tempest system.
+ *                                In case of predefined tempest config usage:
+ *                                    TEST_TEMPEST_CONF should be a path to predefined tempest config inside container.
  *   TEST_DOCKER_INSTALL          Install docker
  *   TEST_TEMPEST_TARGET          Salt target to run tempest on
  *   TEST_TEMPEST_PATTERN         Tempest tests pattern
@@ -29,7 +35,6 @@
  *   TEST_PASS_THRESHOLD          Persent of passed tests to consider build successful
  *   SLAVE_NODE                   Label or node name where the job will be run
  *   USE_PEPPER                   Whether to use pepper for connection to salt master
- *   AUTO_TEMPEST_CONFIG          Whether to genarate tempest configuration automatically
  *
  */
 
@@ -89,15 +94,11 @@ node(slave_node) {
             }
         }
 
-        def test_tempest_conf=TEST_TEMPEST_CONF
-        if (common.validInputParam('AUTO_TEMPEST_CONFIG') && AUTO_TEMPEST_CONFIG.toBoolean()) {
-            stage ('Generate tempest configuration') {
-                salt.enforceState(saltMaster, 'I@salt:master', ['runtest'], true)                
-                /*
-                Assume tempest config will be generated into /root/rally_reports/tempest_generated.conf by runtest state.
-                i.e. /home/rally/rally_reports/tempest_generated.conf on docker tempest system.
-                */
-                test_tempest_conf = '/home/rally/rally_reports/tempest_generated.conf'
+        stage ('Generate tempest configuration') {
+            if (salt.testTarget(saltMaster, "I@runtest:tempest and ${TEST_TEMPEST_TARGET}")) {
+                salt.enforceState(saltMaster, "I@runtest:tempest and ${TEST_TEMPEST_TARGET}", ['runtest'], true)
+            } else {
+                common.warningMsg('Cannot generate tempest config by runtest salt')
             }
         }
 
@@ -126,7 +127,7 @@ node(slave_node) {
                                              '/home/rally/keystonercv3',
                                              test_tempest_set,
                                              test_tempest_concurrency,
-                                             test_tempest_conf)
+                                             TEST_TEMPEST_CONF)
             def tempest_stdout
             tempest_stdout = salt.cmdRun(saltMaster, TEST_TEMPEST_TARGET, "cat ${reports_dir}/report_${test_tempest_set}_*.log", true, null, false)['return'][0].values()[0].replaceAll('Salt command execution success', '')
             common.infoMsg('Short test report:')
