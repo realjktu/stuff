@@ -1,8 +1,8 @@
-ldap_host = '192.168.153.201'
-domain = 'domain1.local'
-user = 'cyberx1'
+ldap_host = '192.168.153.203'
+domain = 'domain4.local'
+user = 'cyberx3'
 password = 'cruvuttj@4338'
-search_base = 'cn=Users,dc=domain2,dc=local'
+search_base = 'cn=Users,dc=domain4,dc=local'
 
 from ldap3 import Server, \
     Connection, \
