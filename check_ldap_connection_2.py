@@ -1,14 +1,21 @@
+'''
+
+1. configure Kerberos user config check_ldap_connection_krb5.ini
+2. execute: export KRB5_CONFIG=<path to check_ldap_connection_krb5.ini file>
+3. Run ./check_ldap_connection_2.py script
+
+'''
 import ssl, sys, os
 from subprocess import Popen, PIPE
 from ldap3 import Server, Connection, Tls, SASL, KERBEROS
 from ldif3 import LDIFParser
 from pprint import pprint
 
-ldap_server = 'dc1.domain1.local'
-userid = 'cyberx1'
-realm = 'DOMAIN1.LOCAL'
+ldap_server = 'dc4.domain4.local'
+userid = 'cyberx3'
+realm = 'DOMAIN3.LOCAL'
 password = 'cruvuttj@4338'
-base_dn = 'cn=Users,dc=domain1,dc=local'
+base_dn = 'cn=Users,dc=domain4,dc=local'
 temp_file = '/tmp/check_users_ldap.tmp'
 
 
