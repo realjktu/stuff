@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 '''
 
-1. configure Kerberos user config check_ldap_connection_krb5.ini
-2. execute: export KRB5_CONFIG=<path to check_ldap_connection_krb5.ini file>
+1. configure Kerberos user config check_ldap_connection_krb5.ini or system /etc/krb5.conf
+3. define correct properties below
 3. Run ./check_ldap_connection_3.py script
 
 '''
@@ -16,7 +16,7 @@ def main():
     base_dn = 'dc=domain4,dc=local'
     username = 'cyberx3'
     password = 'cruvuttj@4338'
-    krb5_config_path = '/home/jktu/stuff/check_ldap_connection_krb5.ini'
+    krb5_config_path = '/home/jktu/stuff/check_ldap_connection_krb5.ini'  # Path to Kerberos config file or None to use system Kerberos config.
     #krb5_config_path = None
     krb = KerberosClient(username=username, realm=domain, password=password, krb5_config_path=krb5_config_path)
     with LDAPClient(host=address, username=username, password=password, domain=domain, authentication_mechanism='GSSAPI', base_dn=base_dn) as ldap_client:
