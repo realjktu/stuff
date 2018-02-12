@@ -1,0 +1,4 @@
+---
+- hosts: nvidia_hosts
+  roles:
+    - nvidia

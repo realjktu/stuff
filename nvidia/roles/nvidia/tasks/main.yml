@@ -1,0 +1,52 @@
+- name: Upgrade all packages
+  yum:
+    name: '*'
+    state: latest
+
+- name: Restart server
+  command: /sbin/shutdown -r +1
+  async: 0
+  poll: 0
+  ignore_errors: true
+
+- name: Waiting for server to come back after reboot
+  local_action: wait_for host={{ ansible_ssh_host }} state=started
+
+- name: Get uname
+  command: uname -r
+  register: uname_out
+
+- set_fact:
+  uname: '{{ uname_out.stdout }}'
+
+- debug: msg="{{ uname }}"
+
+- name: install the latest version of gss and kernel-devel
+  yum:
+    name: gcc, kernel-devel-{{ uname }}
+    state: latest
+
+- name: Blacklist drivers
+  template: 
+    src=blacklist_for_nvidia.conf
+    dest="/etc/modprobe.d/blacklist_for_nvidia.conf"
+
+- name: Download Nvidia driver
+  get_url:
+    url: http://us.download.nvidia.com/XFree86/Linux-x86_64/367.106/NVIDIA-Linux-x86_64-367.106.run
+    dest: /tmp/nvidia_driver.run
+    mode: 0755
+
+- name: Install driver
+  command: /bin/bash /tmp/nvidia_driver.run
+  register: install_out
+
+- name: Waiting for server to come back after reboot
+  local_action: wait_for host={{ ansible_ssh_host }} state=started
+
+- name: Check the driver
+  command: nvidia-smi -q | head
+  register: check_out
+
+- debug: msg="{{ check_out }}"
+
