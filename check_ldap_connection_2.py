@@ -11,11 +11,11 @@ from ldap3 import Server, Connection, Tls, SASL, KERBEROS
 from ldif3 import LDIFParser
 from pprint import pprint
 
-ldap_server = 'dc4.domain4.local'
+ldap_server = 'dc3.domain3.local'
 userid = 'cyberx3'
 realm = 'DOMAIN3.LOCAL'
 password = 'cruvuttj@4338'
-base_dn = 'cn=Users,dc=domain4,dc=local'
+base_dn = 'cn=Users,dc=domain3,dc=local'
 temp_file = '/tmp/check_users_ldap.tmp'
 
 
@@ -33,7 +33,7 @@ kinit.wait()
 kinit_res = kinit.stderr.read()
 if kinit.returncode > 0:
 	print("Cannot initialize Kerberos. Error is: {}".format(kinit.stderr.read()))
-	sys.exit(1)
+	sys.exit(kinit.returncode)
 
 print("Execute ldapsearch")
 #server = Server(ldap_server)
@@ -45,11 +45,11 @@ ldapsearch_args = [ldapsearch, '-Y', 'GSSAPI', '-v', '-h', ldap_server, '-b', ba
 ldapsearch = Popen(ldapsearch_args, stdout=PIPE, stderr=PIPE)
 ldapsearch.wait()
 ldapsearch_res = ldapsearch.stdout.read()
-
 if ldapsearch.returncode > 0:
 	print("Cannot perform ldapsearch. STDERR is:\n{}".format(ldapsearch.stderr.read()))
+        sys.exit(ldapsearch.returncode)
 
-os.remove(temp_file)
+#os.remove(temp_file)
 fh = open(temp_file,"w")
 fh.write(ldapsearch_res)
 fh.close()
