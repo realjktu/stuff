@@ -73,7 +73,7 @@ def snapshotCreate(server, repo, packageRefs = null) {
         try{
             resp = http.sendHttpPostRequest(server + '/api/snapshots', data)
         } catch (Exception e) {
-            print resp
+            print('ex')
         }    
         echo "Response: ${resp}"
     } else {
@@ -104,8 +104,14 @@ def snapshotPublish(server, snapshot = null, distribution, components, prefix) {
         source['Component'] = components
         data['Sources'] = [source]
         data['Architectures'] = ['amd64']
-        data['Distribution'] = distribution        
-        return http.sendHttpPostRequest(server + "/api/publish/${prefix}", data)
+        data['Distribution'] = distribution     
+        def resp 
+        try {
+           resp = http.sendHttpPostRequest(server + "/api/publish/${prefix}", data)
+        } catch (Exception e) {
+            print('ex')
+        }   
+        return resp 
     }
 }
 
