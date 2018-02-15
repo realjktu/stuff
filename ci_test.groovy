@@ -1,7 +1,7 @@
 http = new com.mirantis.mk.Http()
 
 def getnightlySnapshot(server, distribution, prefix, component) {
-    def list_published = http.sendHttpGetRequest(server, '/api/publish')
+    def list_published = http.sendHttpGetRequest(server + '/api/publish')
     def storage
 
     for (items in list_published) {
