@@ -107,7 +107,7 @@ def snapshotPublish(server, snapshot = null, distribution, components, prefix) {
         data['Distribution'] = distribution
         def resp 
         try {
-           resp = http.sendHttpPostRequest(server + "/api/publish/${prefix}", data)
+           resp = http.restPost(server, "/api/publish/${prefix}", data)
         } catch (Exception e) {
             print('ex')
         }   
