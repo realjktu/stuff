@@ -72,7 +72,7 @@ def snapshotCreate(server, repo, packageRefs = null) {
         def resp
         try{
             resp = http.sendHttpPostRequest(server + '/api/snapshots', data)
-        catch (Exception e) {
+        } catch (Exception e) {
             print res
         }    
         echo "Response: ${resp}"
