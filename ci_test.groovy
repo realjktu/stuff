@@ -1,4 +1,5 @@
 http = new com.mirantis.mk.Http()
+common = new com.mirantis.mk.Common()
 
 def getSnapshot(server, distribution, prefix, component) {
     def list_published = http.sendHttpGetRequest(server + '/api/publish')
