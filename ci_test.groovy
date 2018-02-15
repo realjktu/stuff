@@ -48,16 +48,52 @@ def snapshotPackages(server, snapshot, packagesList) {
 }
 
 
+/**
+ * Creates snapshot of the repo or package refs
+ * @param server        URI of the server insluding port and protocol
+ * @param repo          Local repo name
+ * @param packageRefs   List of the packages are going to be included into the snapshot
+ **/
+def snapshotCreate(server, repo, packageRefs = null) {
+    def now = new Date()
+    def ts = now.format('yyyyMMddHHmmss', TimeZone.getTimeZone('UTC'))
+    def snapshot = "os-salt-formulas-${ts}-oscc-dev"
+
+    if (packageRefs) {
+        String listString = packageRefs.join('\",\"')
+//        println ("LISTSTRING: ${listString}")
+//        String data = "{\"Name\":\"${snapshot}\", \"Description\": \"OpenStack Core Components salt formulas CI\", \"PackageRefs\": [\"${listString}\"]}"
+        data  = [:]
+        data['Name'] = snapshot
+        data['Description'] = 'OpenStack Core Components salt formulas CI'
+        data['PackageRefs'] = listString
+        echo "HTTP body is going to be sent: ${data}"
+//        def resp = http.sendHttpPostRequest(server + '/api/snapshots', data)
+//        echo "Response: ${resp}"
+    } else {
+        String data = "{\"Name\": \"${snapshot}\", \"Description\": \"OpenStack Core Components salt formulas CI\"}"
+        echo "HTTP body is going to be sent: ${data}"
+//        def resp = http.sendHttpPostRequest(server + "/api/repos/${repo}/snapshots", data)
+//        echo "Response: ${resp}"
+    }
+
+    return snapshot
+}
+
+
+
 node {
 
 def server = 'http://172.16.48.254:8084'
 def components = 'salt'
 def OPENSTACK_COMPONENTS_LIST = 'salt-formula-nova,salt-formula-cinder,salt-formula-glance,salt-formula-keystone,salt-formula-horizon,salt-formula-neutron,salt-formula-designate,salt-formula-heat,salt-formula-ironic,salt-formula-barbican'
 def nightlySnapshot = getSnapshot(server, 'nightly', 'xenial', components)
+def repo = 'ubuntu-xenial-salt'
+
 print(nightlySnapshot)
 def snapshotpkglist = snapshotPackages(server, nightlySnapshot, OPENSTACK_COMPONENTS_LIST)
 print(snapshotpkglist)
-//snapshot = snapshotCreate(server, repo, snapshotpkglist)
-
+snapshot = snapshotCreate(server, repo, snapshotpkglist)
+common.successMsg("Snapshot ${snapshot} has been created for packages: ${snapshotpkglist}")
 
 }
