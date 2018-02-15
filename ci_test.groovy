@@ -102,7 +102,8 @@ def snapshotPublishByAPI(server, snapshot, distribution, components, prefix) {
  */
 def unpublishByAPI(aptlyServer, aptlyPrefix, aptlyRepo){
     http = new com.mirantis.mk.Http()
-    http.restDel(aptlyServer, "/api/publish/${aptlyPrefix}/${aptlyRepo}")
+    http.restCall(aptlyServer, "/api/publish/${aptlyPrefix}/${aptlyRepo}", 'DELETE')
+    //http.restDel(aptlyServer, "/api/publish/${aptlyPrefix}/${aptlyRepo}")
 }
 
 /**
@@ -113,7 +114,8 @@ def unpublishByAPI(aptlyServer, aptlyPrefix, aptlyRepo){
  */
 def deleteRepoByAPI(aptlyServer, aptlyRepo){
     http = new com.mirantis.mk.Http()
-    http.restDel(aptlyServer, "/api/repos/${aptlyRepo}")
+    http.restCall(aptlyServer, "/api/repos/${aptlyRepo}", 'DELETE')
+    //http.restDel(aptlyServer, "/api/repos/${aptlyRepo}")
 }
 
 
