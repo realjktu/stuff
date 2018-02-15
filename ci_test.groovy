@@ -2,7 +2,7 @@ http = new com.mirantis.mk.Http()
 common = new com.mirantis.mk.Common()
 
 def getSnapshot(server, distribution, prefix, component) {
-    def list_published = http.sendHttpGetRequest(server + '/api/publish')
+    def list_published = http.restGet(server, '/api/publish')
     def storage
 
     for (items in list_published) {
@@ -37,7 +37,7 @@ def getSnapshot(server, distribution, prefix, component) {
  **/
 
 def snapshotPackages(server, snapshot, packagesList) {
-    def pkgs = http.sendHttpGetRequest(server + "/api/snapshots/${snapshot}/packages")
+    def pkgs = http.restGet(server, "/api/snapshots/${snapshot}/packages")
     def openstack_packages = []
 
     for (package_pattern in packagesList.tokenize(',')) {
@@ -71,7 +71,7 @@ def snapshotCreate(server, repo, packageRefs = null) {
         echo "HTTP body is going to be sent: ${data}"
         def resp
         try{
-            resp = http.sendHttpPostRequest(server + '/api/snapshots', data)
+            resp = http.restPost(server, '/api/snapshots', data)
         } catch (Exception e) {
             print('ex')
         }    
@@ -104,7 +104,7 @@ def snapshotPublish(server, snapshot = null, distribution, components, prefix) {
         source['Component'] = components
         data['Sources'] = [source]
         data['Architectures'] = ['amd64']
-        data['Distribution'] = distribution     
+        data['Distribution'] = distribution
         def resp 
         try {
            resp = http.sendHttpPostRequest(server + "/api/publish/${prefix}", data)
@@ -118,7 +118,9 @@ def snapshotPublish(server, snapshot = null, distribution, components, prefix) {
 
 node {
 
-def server = 'http://172.16.48.254:8084'
+def server = [
+        'url': 'http://172.16.48.254:8084',
+]
 def components = 'salt'
 def OPENSTACK_COMPONENTS_LIST = 'salt-formula-nova,salt-formula-cinder,salt-formula-glance,salt-formula-keystone,salt-formula-horizon,salt-formula-neutron,salt-formula-designate,salt-formula-heat,salt-formula-ironic,salt-formula-barbican'
 def nightlySnapshot = getSnapshot(server, 'nightly', 'xenial', components)
@@ -134,6 +136,7 @@ def now = new Date()
 def ts = now.format('yyyyMMddHHmmss', TimeZone.getTimeZone('UTC'))
 def distribution = "${DISTRIBUTION}-${ts}"
 def prefix = 'oscc-dev'
+def prefix = 's3:aptcdn:oscc-dev'
 snapshotPublish(server, snapshot, distribution, components, prefix)
 common.successMsg("Snapshot ${snapshot} has been published for prefix ${prefix}")
 
