@@ -69,8 +69,8 @@ def snapshotCreate(server, repo, packageRefs = null) {
         data['Description'] = 'OpenStack Core Components salt formulas CI'
         data['PackageRefs'] = listString
         echo "HTTP body is going to be sent: ${data}"
-//        def resp = http.sendHttpPostRequest(server + '/api/snapshots', data)
-//        echo "Response: ${resp}"
+        def resp = http.sendHttpPostRequest(server + '/api/snapshots', data)
+        echo "Response: ${resp}"
     } else {
         String data = "{\"Name\": \"${snapshot}\", \"Description\": \"OpenStack Core Components salt formulas CI\"}"
         echo "HTTP body is going to be sent: ${data}"
