@@ -100,7 +100,7 @@ def snapshotPublishByAPI(server, snapshot, distribution, components, prefix) {
  * @param aptlyPrefix Aptly prefix where need to delete a repo
  * @param aptlyRepo  Aptly repo name
  */
-def aptlyUnpublishByAPI(aptlyServer, aptlyPrefix, aptlyRepo){
+def unpublishByAPI(aptlyServer, aptlyPrefix, aptlyRepo){
     http = new com.mirantis.mk.Http()
     http.restDel(aptlyServer, "/api/publish/${aptlyPrefix}/${aptlyRepo}")
 }
@@ -124,10 +124,13 @@ def server = [
 ]
 def components = 'salt'
 def OPENSTACK_COMPONENTS_LIST = 'salt-formula-nova,salt-formula-cinder,salt-formula-glance,salt-formula-keystone,salt-formula-horizon,salt-formula-neutron,salt-formula-designate,salt-formula-heat,salt-formula-ironic,salt-formula-barbican'
-def nightlySnapshot = getSnapshotByAPI(server, 'nightly', 'xenial', components)
 def repo = 'ubuntu-xenial-salt'
 def DISTRIBUTION = 'dev-os-salt-formulas'
+def prefix = 'oscc-dev'
+//def prefix = 's3:aptcdn:oscc-dev'
 
+/*
+def nightlySnapshot = getSnapshotByAPI(server, 'nightly', 'xenial', components)
 print(nightlySnapshot)
 def snapshotpkglist = snapshotPackagesByAPI(server, nightlySnapshot, OPENSTACK_COMPONENTS_LIST)
 print(snapshotpkglist)
@@ -141,9 +144,14 @@ snapshotCreateByAPI(server, repo, snapshot, snapshotDescription, snapshotpkglist
 
 common.successMsg("Snapshot ${snapshot} has been created for packages: ${snapshotpkglist}")
 def distribution = "${DISTRIBUTION}-${ts}"
-def prefix = 'oscc-dev'
-//def prefix = 's3:aptcdn:oscc-dev'
+
+
 snapshotPublishByAPI(server, snapshot, distribution, components, prefix)
 common.successMsg("Snapshot ${snapshot} has been published for prefix ${prefix}")
+*/
+
+repo = 'dev-os-salt-formulas-20180215141406'
+unpublishByAPI(server, prefix, repo)
+deleteRepoByAPI(server, repo)
 
 }
