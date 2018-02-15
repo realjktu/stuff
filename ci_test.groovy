@@ -69,12 +69,7 @@ def snapshotCreate(server, repo, packageRefs = null) {
         data['Description'] = 'OpenStack Core Components salt formulas CI'
         data['PackageRefs'] = packageRefs
         echo "HTTP body is going to be sent: ${data}"
-        def resp
-        try{
-            resp = http.restPost(server, '/api/snapshots', data)
-        } catch (Exception e) {
-            print('ex')
-        }    
+        def resp = http.restPost(server, '/api/snapshots', data)
         echo "Response: ${resp}"
     } else {
         String data = "{\"Name\": \"${snapshot}\", \"Description\": \"OpenStack Core Components salt formulas CI\"}"
@@ -104,14 +99,8 @@ def snapshotPublish(server, snapshot = null, distribution, components, prefix) {
         source['Component'] = components
         data['Sources'] = [source]
         data['Architectures'] = ['amd64']
-        data['Distribution'] = distribution
-        def resp 
-        try {
-           resp = http.restPost(server, "/api/publish/${prefix}", data)
-        } catch (Exception e) {
-            print('ex')
-        }   
-        return resp 
+        data['Distribution'] = distribution  
+        return http.restPost(server, "/api/publish/${prefix}", data)
     }
 }
 
@@ -135,8 +124,8 @@ common.successMsg("Snapshot ${snapshot} has been created for packages: ${snapsho
 def now = new Date()
 def ts = now.format('yyyyMMddHHmmss', TimeZone.getTimeZone('UTC'))
 def distribution = "${DISTRIBUTION}-${ts}"
-def prefix = 'oscc-dev'
-//def prefix = 's3:aptcdn:oscc-dev'
+//def prefix = 'oscc-dev'
+def prefix = 's3:aptcdn:oscc-dev'
 snapshotPublish(server, snapshot, distribution, components, prefix)
 common.successMsg("Snapshot ${snapshot} has been published for prefix ${prefix}")
 
