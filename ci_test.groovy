@@ -70,7 +70,6 @@ def snapshotCreateByAPI(server, repo, snapshotName, snapshotDescription = null, 
     } else {
         http.restPost(server + "/api/repos/${repo}/snapshots", data)
     }
-    return snapshot
 }
 
 /**
