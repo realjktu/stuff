@@ -102,9 +102,9 @@ def snapshotPublish(server, snapshot = null, distribution, components, prefix) {
         def source = [:]
         source['Name'] = snapshot
         source['Component'] = components
-        source['Architectures'] = ['amd64']
-        source['Distribution'] = distribution
         data['Sources'] = [source]
+        data['Architectures'] = ['amd64']
+        data['Distribution'] = distribution        
         return http.sendHttpPostRequest(server + "/api/publish/${prefix}", data)
     }
 }
