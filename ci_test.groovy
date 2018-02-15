@@ -136,7 +136,7 @@ def now = new Date()
 def ts = now.format('yyyyMMddHHmmss', TimeZone.getTimeZone('UTC'))
 def snapshot = "os-salt-formulas-${ts}-oscc-dev"
 def snapshotDescription = 'OpenStack Core Components salt formulas CI'
-snapshot = snapshotCreateByAPI(server, repo, snapshot, snapshotDescription, snapshotpkglist)
+snapshotCreateByAPI(server, repo, snapshot, snapshotDescription, snapshotpkglist)
 
 
 common.successMsg("Snapshot ${snapshot} has been created for packages: ${snapshotpkglist}")
