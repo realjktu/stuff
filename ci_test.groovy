@@ -141,8 +141,6 @@ snapshot = snapshotCreateByAPI(server, repo, snapshot, snapshotDescription, snap
 
 
 common.successMsg("Snapshot ${snapshot} has been created for packages: ${snapshotpkglist}")
-def now = new Date()
-def ts = now.format('yyyyMMddHHmmss', TimeZone.getTimeZone('UTC'))
 def distribution = "${DISTRIBUTION}-${ts}"
 def prefix = 'oscc-dev'
 //def prefix = 's3:aptcdn:oscc-dev'
