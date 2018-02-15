@@ -136,7 +136,7 @@ def now = new Date()
 def ts = now.format('yyyyMMddHHmmss', TimeZone.getTimeZone('UTC'))
 def distribution = "${DISTRIBUTION}-${ts}"
 def prefix = 'oscc-dev'
-def prefix = 's3:aptcdn:oscc-dev'
+//def prefix = 's3:aptcdn:oscc-dev'
 snapshotPublish(server, snapshot, distribution, components, prefix)
 common.successMsg("Snapshot ${snapshot} has been published for prefix ${prefix}")
 
