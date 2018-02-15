@@ -11,7 +11,6 @@ def getSnapshotByAPI(server, distribution, prefix, component) {
             } else {
                 storage = ''
             }
-
             if (row.key == 'Distribution' && row.value == distribution && items['Prefix'] == prefix.tokenize(':').last() && items['Storage'] == storage) {
                 for (source in items['Sources']){
                     if (source['Component'] == component) {
