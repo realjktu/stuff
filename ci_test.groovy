@@ -69,7 +69,12 @@ def snapshotCreate(server, repo, packageRefs = null) {
         data['Description'] = 'OpenStack Core Components salt formulas CI'
         data['PackageRefs'] = packageRefs
         echo "HTTP body is going to be sent: ${data}"
-        def resp = http.sendHttpPostRequest(server + '/api/snapshots', data)
+        def resp
+        try{
+            resp = http.sendHttpPostRequest(server + '/api/snapshots', data)
+        catch (Exception e) {
+            print res
+        }    
         echo "Response: ${resp}"
     } else {
         String data = "{\"Name\": \"${snapshot}\", \"Description\": \"OpenStack Core Components salt formulas CI\"}"
@@ -81,6 +86,28 @@ def snapshotCreate(server, repo, packageRefs = null) {
     return snapshot
 }
 
+/**
+ * Publishes the snapshot accodgin to distribution, components and prefix
+ * @param server        URI of the server insluding port and protocol
+ * @param snapshot      Snapshot is going to be published
+ * @param distribution  Distribution for the published repo
+ * @param components    Component for the published repo
+ * @param prefix        Prefix for thepubslidhed repo including storage
+ **/
+def snapshotPublish(server, snapshot = null, distribution, components, prefix) {
+    if (snapshot) {
+        //String data = "{\"SourceKind\": \"snapshot\", \"Sources\": [{\"Name\": \"${snapshot}\", \"Component\": \"${components}\" }], \"Architectures\": [\"amd64\"], \"Distribution\": \"${distribution}\"}"
+        def data = [:]
+        data['SourceKind'] = 'snapshot'
+        def source = [:]
+        source['Name'] = snapshot
+        source['Component'] = components
+        source['Architectures'] = ['amd64']
+        source['Distribution'] = distribution
+        data['Sources'] = [source]
+        return http.sendHttpPostRequest(server + "/api/publish/${prefix}", data)
+    }
+}
 
 
 node {
@@ -90,12 +117,18 @@ def components = 'salt'
 def OPENSTACK_COMPONENTS_LIST = 'salt-formula-nova,salt-formula-cinder,salt-formula-glance,salt-formula-keystone,salt-formula-horizon,salt-formula-neutron,salt-formula-designate,salt-formula-heat,salt-formula-ironic,salt-formula-barbican'
 def nightlySnapshot = getSnapshot(server, 'nightly', 'xenial', components)
 def repo = 'ubuntu-xenial-salt'
-DEBUG
+def DISTRIBUTION = 'dev-os-salt-formulas'
 
 print(nightlySnapshot)
 def snapshotpkglist = snapshotPackages(server, nightlySnapshot, OPENSTACK_COMPONENTS_LIST)
 print(snapshotpkglist)
 snapshot = snapshotCreate(server, repo, snapshotpkglist)
 common.successMsg("Snapshot ${snapshot} has been created for packages: ${snapshotpkglist}")
+def now = new Date()
+def ts = now.format('yyyyMMddHHmmss', TimeZone.getTimeZone('UTC'))
+def distribution = "${DISTRIBUTION}-${ts}"
+def prefix = 'oscc-dev'
+snapshotPublish(server, snapshot, distribution, components, prefix)
+common.successMsg("Snapshot ${snapshot} has been published for prefix ${prefix}")
 
 }
