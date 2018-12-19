@@ -31,9 +31,9 @@ kubectl apply -f /tmp/rbac-config-${SA_NAME}.yaml
 # Get related secret
 secret=$(kubectl -n ${SA_NAMESPACE} get sa ${SA_NAME} -o json | jq -r .secrets[].name)
 # Get ca.crt from secret 
-kubectl -n ${SA_NAMESPACE} get secret $secret -o json | jq -r '.data["ca.crt"]' | base64 -d > /tmp/${SA_NAME}_ca.crt
+kubectl -n ${SA_NAMESPACE} get secret $secret -o json | jq -r '.data["ca.crt"]' | base64 --decode > /tmp/${SA_NAME}_ca.crt
 # Get service account token from secret
-user_token=$(kubectl -n ${SA_NAMESPACE} get secret $secret -o json | jq -r '.data["token"]' | base64 -d)
+user_token=$(kubectl -n ${SA_NAMESPACE} get secret $secret -o json | jq -r '.data["token"]' | base64 --decode)
 # Get information from your kubectl config (current-context, server..)
 # get current context
 c=`kubectl config current-context`
